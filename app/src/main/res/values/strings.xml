@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">小柚记账</string>
+    <string name="auto_record_notify_label">自动记账通知监听</string>
+    <string name="auto_record_service_label">自动记账无障碍服务</string>
+    <string name="auto_record_service_desc">用于读取微信、支付宝账单详情页，实现自动记账</string>
+</resources>
