@@ -27,6 +27,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -48,6 +49,9 @@ import com.example.jizhangruanjian.core.util.Formatters
 import com.example.jizhangruanjian.data.model.AccountType
 import com.example.jizhangruanjian.domain.model.AccountDomain
 import com.example.jizhangruanjian.domain.model.AccountGroupDomain
+import com.example.jizhangruanjian.ui.components.AppTopBar
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 @Composable
 fun AccountScreen(onBack: () -> Unit, viewModel: AccountViewModel = hiltViewModel()) {
     val groups by viewModel.groups.collectAsState()
@@ -60,14 +64,9 @@ fun AccountScreen(onBack: () -> Unit, viewModel: AccountViewModel = hiltViewMode
     var deleteGroup by remember { mutableStateOf<AccountGroupDomain?>(null) }
     var deleteAccount by remember { mutableStateOf<AccountDomain?>(null) }
     LaunchedEffect(message) { if (message != null) { viewModel.clearMessage() } }
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Text("账户管理", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            IconButton(onClick = { addGroup = true }) { Icon(Icons.Filled.Add, contentDescription = "新建分组") }
-        }
-        Spacer(Modifier.height(8.dp))
-        Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "账户管理", onBack = onBack, actions = { IconButton(onClick = { addGroup = true }) { Icon(Icons.Filled.Add, contentDescription = "新建分组") } }) }) { pad ->
+        Column(modifier = Modifier.fillMaxSize().padding(pad).padding(horizontal = AppSpacing.lg)) {
+            Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
             if (groups.isEmpty()) { Text("暂无账户分组，点右上角新建", color = MaterialTheme.colorScheme.onSurfaceVariant) }
             groups.forEach { group ->
                 val groupAccounts = accounts.filter { it.groupId == group.id }
@@ -94,6 +93,7 @@ fun AccountScreen(onBack: () -> Unit, viewModel: AccountViewModel = hiltViewMode
     renameAccount?.let { a -> GroupNameDialog("重命名账户", a.name, onConfirm = { viewModel.renameAccount(a.id, it); renameAccount = null }, onDismiss = { renameAccount = null }) }
     deleteGroup?.let { g -> AlertDialog(onDismissRequest = { deleteGroup = null }, confirmButton = { TextButton(onClick = { viewModel.deleteGroup(g.id); deleteGroup = null }) { Text("删除", color = MaterialTheme.colorScheme.error) } }, dismissButton = { TextButton(onClick = { deleteGroup = null }) { Text("取消") } }, title = { Text("删除分组") }, text = { Text("确定删除分组「${g.name}」？") }) }
     deleteAccount?.let { a -> AlertDialog(onDismissRequest = { deleteAccount = null }, confirmButton = { TextButton(onClick = { viewModel.deleteAccount(a.id); deleteAccount = null }) { Text("删除", color = MaterialTheme.colorScheme.error) } }, dismissButton = { TextButton(onClick = { deleteAccount = null }) { Text("取消") } }, title = { Text("删除账户") }, text = { Text("确定删除账户「${a.name}」？") }) }
+}
 }
 @Composable
 private fun GroupCard(group: AccountGroupDomain, accountCount: Int, onRename: () -> Unit, onDelete: () -> Unit, onMoveUp: () -> Unit, onMoveDown: () -> Unit, onAddAccount: () -> Unit) {

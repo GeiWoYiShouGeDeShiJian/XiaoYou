@@ -55,6 +55,8 @@ import com.example.jizhangruanjian.core.util.Formatters
 import com.example.jizhangruanjian.data.model.CoverTextColor
 import com.example.jizhangruanjian.domain.model.AccountDomain
 import com.example.jizhangruanjian.domain.model.AccountGroupDomain
+import com.example.jizhangruanjian.ui.theme.AppSpacing
+import com.example.jizhangruanjian.ui.theme.OverlayColors
 @Composable
 fun AccountTabScreen(viewModel: AccountTabViewModel = hiltViewModel(), onMenuClick: () -> Unit, onNavigate: (String) -> Unit, onAddAccount: () -> Unit, onOpenReport: () -> Unit, onManage: () -> Unit, onPickLedger: () -> Unit, onOpenDetail: (Long) -> Unit = {}, onSort: () -> Unit = {}) {
     val groups by viewModel.groups.collectAsState()
@@ -72,8 +74,8 @@ fun AccountTabScreen(viewModel: AccountTabViewModel = hiltViewModel(), onMenuCli
     val net = visible.filter { it.includeInNet }.sumOf { it.balance }
     val totalAsset = visible.filter { it.includeInNet && it.balance > 0 }.sumOf { it.balance }
     val totalDebt = visible.filter { it.includeInNet && it.balance < 0 }.sumOf { it.balance }
-    val textColor = if (config.coverTextColor == CoverTextColor.LIGHT) Color.White else Color(0xFF1A1A1A)
-    val subColor = if (config.coverTextColor == CoverTextColor.LIGHT) Color.White.copy(alpha = 0.85f) else Color(0xFF1A1A1A).copy(alpha = 0.75f)
+    val textColor = if (config.coverTextColor == CoverTextColor.LIGHT) Color.White else OverlayColors.coverText
+    val subColor = if (config.coverTextColor == CoverTextColor.LIGHT) Color.White.copy(alpha = 0.85f) else OverlayColors.coverText.copy(alpha = 0.75f)
     val coverRes = coverResId(config.ledgerCover)
     val orderedGroups = orderGroups(groups, config)
     val sortedAll = sortAccounts(all, config)
@@ -81,9 +83,9 @@ fun AccountTabScreen(viewModel: AccountTabViewModel = hiltViewModel(), onMenuCli
     val filtered = if (q.isEmpty()) sortedAll else sortedAll.filter { it.name.contains(q) || it.note.contains(q) }
     val displayGroups = if (q.isEmpty()) orderedGroups else orderedGroups.filter { g -> filtered.any { it.groupId == g.id } }
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xs)) {
             IconButton(onClick = onMenuClick) { Icon(Icons.Filled.Menu, contentDescription = "菜单") }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onPickLedger() }.padding(horizontal = 4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onPickLedger() }.padding(horizontal = AppSpacing.xs)) {
                 Text(ledgerName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
             }
@@ -105,16 +107,16 @@ fun AccountTabScreen(viewModel: AccountTabViewModel = hiltViewModel(), onMenuCli
             }
         }
         if (searchMode) {
-            androidx.compose.material3.OutlinedTextField(value = query, onValueChange = { query = it }, placeholder = { Text("搜索账户") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp))
+            androidx.compose.material3.OutlinedTextField(value = query, onValueChange = { query = it }, placeholder = { Text("搜索账户") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.md, vertical = AppSpacing.xs))
         }
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp)) {
-            Box(modifier = Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(16.dp)).clickable { hideAmount = !hideAmount }) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = AppSpacing.md)) {
+            Box(modifier = Modifier.fillMaxWidth().height(150.dp).clip(MaterialTheme.shapes.large).clickable { hideAmount = !hideAmount }) {
                 if (coverRes != null) {
                     Image(painter = painterResource(id = coverRes), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 } else {
                     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary))
                 }
-                Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                Column(modifier = Modifier.fillMaxSize().padding(AppSpacing.lg)) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("净资产", style = MaterialTheme.typography.bodyMedium, color = subColor)
@@ -129,7 +131,7 @@ fun AccountTabScreen(viewModel: AccountTabViewModel = hiltViewModel(), onMenuCli
                     }
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(AppSpacing.md))
             if (displayGroups.isEmpty()) {
                 Text(if (q.isNotEmpty()) "未找到匹配的账户" else "暂无账户，点右上 ⊕ 创建", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp))
             }
@@ -141,14 +143,14 @@ fun AccountTabScreen(viewModel: AccountTabViewModel = hiltViewModel(), onMenuCli
                 GroupCard(g, groupAccounts, groupSum, isCollapsed, hideAmount, showHidden, onClick = { collapsed[g.id] = !isCollapsed }, onAccount = onOpenDetail, onToggleHidden = { viewModel.toggleHidden(it) })
                 Spacer(Modifier.height(10.dp))
             }
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(AppSpacing.xxl))
         }
     }
 }
 @Composable
 private fun GroupCard(group: AccountGroupDomain, accounts: List<AccountDomain>, sum: Long, collapsed: Boolean, hideAmount: Boolean, showHidden: Boolean, onClick: () -> Unit, onAccount: (Long) -> Unit, onToggleHidden: (AccountDomain) -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surface)) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 14.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surface)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = AppSpacing.lg, vertical = 14.dp)) {
             Text(group.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
             Text(if (hideAmount) "****" else Formatters.yuanText(sum), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Icon(if (collapsed) Icons.Filled.ArrowDropDown else Icons.Filled.ArrowDropUp, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -156,11 +158,11 @@ private fun GroupCard(group: AccountGroupDomain, accounts: List<AccountDomain>, 
         if (!collapsed) {
             val list = if (showHidden) accounts else accounts.filter { !it.hidden && !(it.autoHideZero && it.balance == 0L) }
             if (list.isEmpty()) {
-                Text("暂无账户", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 16.dp, bottom = 12.dp))
+                Text("暂无账户", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = AppSpacing.lg, bottom = AppSpacing.md))
             }
             list.forEach { a ->
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onAccount(a.id) }.padding(start = 12.dp, end = 16.dp, bottom = 8.dp)) {
-                    Box(modifier = Modifier.size(34.dp).clip(RoundedCornerShape(8.dp)).background(Color(a.color).copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onAccount(a.id) }.padding(start = AppSpacing.md, end = AppSpacing.lg, bottom = AppSpacing.sm)) {
+                    Box(modifier = Modifier.size(34.dp).clip(MaterialTheme.shapes.small).background(Color(a.color).copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
                         Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, tint = Color(a.color), modifier = Modifier.size(18.dp))
                     }
                     Spacer(Modifier.width(10.dp))

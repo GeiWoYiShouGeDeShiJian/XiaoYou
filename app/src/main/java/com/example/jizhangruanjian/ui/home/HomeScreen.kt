@@ -96,6 +96,9 @@ import com.example.jizhangruanjian.ui.components.ImageViewer
 import com.example.jizhangruanjian.ui.components.MoneyBookCard
 import com.example.jizhangruanjian.ui.components.SectionTitle
 import com.example.jizhangruanjian.ui.components.SourceBadge
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.AppSpacing
+import com.example.jizhangruanjian.ui.theme.OverlayColors
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -128,7 +131,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), ledgerViewModel: Ledg
     val ledgerTint = currentLedger?.color?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
     val homeContent: @Composable () -> Unit = {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.xs)) {
                 IconButton(onClick = onMenuClick) { Icon(Icons.Filled.Menu, contentDescription = "菜单") }
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).clickable { onOpenLedgerPicker() }) {
                     Text(currentLedger?.name ?: "账本", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = ledgerTint)
@@ -136,7 +139,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), ledgerViewModel: Ledg
                 }
                 IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "搜索") }
             }
-            LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+            LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = AppSpacing.lg, end = AppSpacing.lg, bottom = AppSpacing.lg)) {
                 summary?.let { s ->
                     item { DataOverviewCard(config = config, s = s, todayExpense = todayExpense, weekExpense = weekExpense, todayIncome = todayIncome, weekIncome = weekIncome, yearIncome = yearIncome, yearExpense = yearExpense, onClick = { if (config.clickCoverToSwitchLedger) onOpenLedgerPicker() else onCustomizeHome() }) }
                     normalizeModuleOrder(config.moduleOrder).forEach { module ->
@@ -170,9 +173,9 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), ledgerViewModel: Ledg
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     expCategories.forEach { c ->
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onRecategorize(tx, c.id); recatTarget = null }.padding(vertical = 8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onRecategorize(tx, c.id); recatTarget = null }.padding(vertical = AppSpacing.sm)) {
                             CategoryIcon(c.icon, size = 22.dp, fontSize = 14.sp)
-                            Spacer(Modifier.width(8.dp))
+                            Spacer(Modifier.width(AppSpacing.sm))
                             Text(c.name, style = MaterialTheme.typography.bodyLarge)
                         }
                     }
@@ -186,19 +189,19 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), ledgerViewModel: Ledg
 }
 @Composable
 private fun DataOverviewCard(config: HomeConfig, s: HomeSummary, todayExpense: Long, weekExpense: Long, todayIncome: Long, weekIncome: Long, yearIncome: Long, yearExpense: Long, onClick: () -> Unit) {
-    val textColor = if (config.coverTextColor == CoverTextColor.LIGHT) Color.White else Color(0xFF1A1A1A)
-    val subColor = if (config.coverTextColor == CoverTextColor.LIGHT) Color.White.copy(alpha = 0.85f) else Color(0xFF1A1A1A).copy(alpha = 0.75f)
+    val textColor = if (config.coverTextColor == CoverTextColor.LIGHT) Color.White else OverlayColors.coverText
+    val subColor = if (config.coverTextColor == CoverTextColor.LIGHT) Color.White.copy(alpha = 0.85f) else OverlayColors.coverText.copy(alpha = 0.75f)
     val coverRes = coverResId(config.ledgerCover)
     Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        Box(modifier = Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick)) {
+        Box(modifier = Modifier.fillMaxWidth().height(160.dp).clip(MaterialTheme.shapes.large).clickable(onClick = onClick)) {
             if (coverRes != null) {
                 Image(painter = painterResource(id = coverRes), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
             } else {
                 Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary))
             }
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            Column(modifier = Modifier.fillMaxSize().padding(AppSpacing.lg)) {
                 Text(optionLabel(config.dataOne), style = MaterialTheme.typography.bodyMedium, color = subColor)
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(AppSpacing.xs))
                 Text(Formatters.yuanText(optionValue(config.dataOne, s, todayExpense, weekExpense, todayIncome, weekIncome, yearIncome, yearExpense)), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = textColor)
                 Spacer(Modifier.weight(1f))
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -214,11 +217,11 @@ private fun TodayStatsBar(todayIncome: Long, todayExpense: Long, onOpenCalendar:
     val now = LocalDate.now()
     val weekLabel = now.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.CHINA)
     MoneyBookCard(modifier = Modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenCalendar).padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenCalendar).padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)) {
             Box(modifier = Modifier.size(34.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
                 Icon(Icons.Filled.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
             }
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(AppSpacing.md))
             Text(now.format(DateTimeFormatter.ofPattern("MM-dd")) + " $weekLabel", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
             Text("收 ", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(Formatters.yuanText(todayIncome), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
@@ -236,9 +239,9 @@ private fun coverResId(cover: String): Int? = when (cover) {
 private fun BudgetCard(totalBudget: BudgetState?, hideMoreButton: Boolean, onMoreBudget: () -> Unit, onOpenDetail: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         MoneyBookCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenDetail)) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(AppSpacing.lg)) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.size(32.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.size(AppSize.iconXLarge).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
                         Icon(Icons.Filled.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
                     }
                     Spacer(Modifier.width(10.dp))
@@ -251,7 +254,7 @@ private fun BudgetCard(totalBudget: BudgetState?, hideMoreButton: Boolean, onMor
                 totalBudget?.let { b ->
                     val budgetProgress by animateFloatAsState(targetValue = (b.usagePercent / 100f).coerceIn(0f, 1f), label = "budgetProgress")
                     LinearProgressIndicator(progress = { budgetProgress }, color = if (b.over) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, trackColor = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth())
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(AppSpacing.sm))
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Text("${Formatters.yuanText(b.spent)} / ${Formatters.yuanText(b.available)}", style = MaterialTheme.typography.bodyMedium, color = if (b.over) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
                         val nowDay = LocalDate.now()
@@ -262,8 +265,8 @@ private fun BudgetCard(totalBudget: BudgetState?, hideMoreButton: Boolean, onMor
             }
         }
         if (!hideMoreButton) {
-            Spacer(Modifier.height(8.dp))
-            Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant).clickable(onClick = onMoreBudget).padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
+            Spacer(Modifier.height(AppSpacing.sm))
+            Box(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceVariant).clickable(onClick = onMoreBudget).padding(vertical = AppSpacing.md), contentAlignment = Alignment.Center) {
                 Text("更多预算 ›", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
@@ -272,12 +275,12 @@ private fun BudgetCard(totalBudget: BudgetState?, hideMoreButton: Boolean, onMor
 private fun LazyListScope.recentSection(recent: List<TransactionDisplay>, onEdit: (TransactionDisplay) -> Unit, onDelete: (TransactionDisplay) -> Unit, onCopy: (TransactionDisplay) -> Unit, onRecategorize: (TransactionDisplay) -> Unit, onViewImages: (List<String>) -> Unit, onSearch: () -> Unit, onOpenMonthDetail: () -> Unit, onAddRecord: () -> Unit) {
     item {
         ModuleGap { SectionTitle("最近交易") }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(AppSpacing.sm))
     }
     if (recent.isEmpty()) {
         item {
             EmptyState(icon = Icons.Filled.Add, title = "还没有记录", subtitle = "点击下方 +，开始你的第一笔吧", ctaText = "记一笔", onCta = onAddRecord)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
         }
     } else {
         val grouped = recent.groupBy { dateOf(it.tradeDate) }.toSortedMap(compareByDescending { it })
@@ -290,7 +293,7 @@ private fun LazyListScope.recentSection(recent: List<TransactionDisplay>, onEdit
             }
         }
         item {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             Text("更多明细 >", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.clickable { onOpenMonthDetail() })
         }
     }
@@ -302,9 +305,9 @@ private fun ModuleGap(content: @Composable () -> Unit) {
 @Composable
 private fun TransactionRow(tx: TransactionDisplay, onViewImages: (List<String>) -> Unit = {}) {
     val isTransfer = tx.type == TransactionType.TRANSFER
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)) {
         CategoryIcon(tx.categoryIcon, size = 40.dp, fontSize = 20.sp)
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(AppSpacing.md))
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(if (isTransfer) "账户互转" else tx.categoryName, style = MaterialTheme.typography.bodyLarge)
@@ -321,7 +324,7 @@ private fun TransactionRow(tx: TransactionDisplay, onViewImages: (List<String>) 
             }
         }
         if (tx.images.isNotEmpty()) {
-            Box(modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.surfaceVariant).clickable { onViewImages(tx.images) }, contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(AppSize.iconLarge).clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.surfaceVariant).clickable { onViewImages(tx.images) }, contentAlignment = Alignment.Center) {
                 Icon(Icons.Filled.Image, contentDescription = "查看图片", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Spacer(Modifier.width(6.dp))
@@ -346,12 +349,12 @@ private fun DismissableTransactionItem(tx: TransactionDisplay, modifier: Modifie
     })
     SwipeToDismissBox(state = dismissState, enableDismissFromStartToEnd = true, enableDismissFromEndToStart = true, modifier = modifier, backgroundContent = {
         val isEdit = dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
-        Box(modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)).background(if (isEdit) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error), contentAlignment = if (isEdit) Alignment.CenterStart else Alignment.CenterEnd) {
+        Box(modifier = Modifier.fillMaxSize().clip(MaterialTheme.shapes.medium).background(if (isEdit) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error), contentAlignment = if (isEdit) Alignment.CenterStart else Alignment.CenterEnd) {
             Icon(if (isEdit) Icons.Filled.Edit else Icons.Filled.Delete, contentDescription = if (isEdit) "编辑" else "删除", tint = MaterialTheme.colorScheme.onPrimary)
         }
     }) {
         var menu by remember(tx.id) { mutableStateOf(false) }
-        Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surface).combinedClickable(onClick = { onEdit(tx) }, onLongClick = { menu = true }).padding(horizontal = 12.dp, vertical = 6.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surface).combinedClickable(onClick = { onEdit(tx) }, onLongClick = { menu = true }).padding(horizontal = AppSpacing.md, vertical = 6.dp)) {
             TransactionRow(tx, onViewImages)
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 DropdownMenuItem(text = { Text("编辑") }, leadingIcon = { Icon(Icons.Filled.Edit, null) }, onClick = { menu = false; onEdit(tx) })
@@ -367,7 +370,7 @@ private fun DateHeader(date: LocalDate, expense: Long) {
     val today = LocalDate.now()
     val label = when (date) { today -> "今天"; today.minusDays(1) -> "昨天"; else -> date.format(DateTimeFormatter.ofPattern("M月d日")) }
     val week = date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.CHINA)
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 4.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(top = AppSpacing.xs, bottom = AppSpacing.xs)) {
         Text("$label $week", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.weight(1f))
         if (expense > 0L) Text("支出 ${Formatters.yuanText(expense)}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -385,7 +388,7 @@ private val QUICK_ENTRIES = listOf(
 @Composable
 private fun QuickEntranceCard(onNavigate: (String) -> Unit) {
     MoneyBookCard(modifier = Modifier.fillMaxWidth()) {
-        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = 14.dp)) {
             QUICK_ENTRIES.forEach { entry ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f).clickable { onNavigate(entry.route) }) {
                     Box(modifier = Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {

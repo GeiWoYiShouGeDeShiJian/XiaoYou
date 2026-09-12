@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -46,7 +47,9 @@ import com.example.jizhangruanjian.domain.model.CategoryDomain
 import com.example.jizhangruanjian.ui.components.AnimatedMoney
 import com.example.jizhangruanjian.ui.components.CategoryIcon
 import com.example.jizhangruanjian.ui.components.MoneyBookCard
+import com.example.jizhangruanjian.ui.components.AppTopBar
 import com.example.jizhangruanjian.ui.components.SectionTitle
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import java.util.Locale
 @Composable
 fun BudgetScreen(onBack: () -> Unit, viewModel: BudgetViewModel = hiltViewModel()) {
@@ -56,20 +59,15 @@ fun BudgetScreen(onBack: () -> Unit, viewModel: BudgetViewModel = hiltViewModel(
     var addDialog by remember { mutableStateOf(false) }
     var editFor by remember { mutableStateOf<BudgetState?>(null) }
     var deleteFor by remember { mutableStateOf<BudgetState?>(null) }
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Text("预算", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            IconButton(onClick = { addDialog = true }) { Icon(Icons.Filled.Add, contentDescription = "新建预算") }
-        }
-        Spacer(Modifier.height(8.dp))
-        Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "预算", onBack = onBack, actions = { IconButton(onClick = { addDialog = true }) { Icon(Icons.Filled.Add, contentDescription = "新建预算") } }) }) { pad ->
+        Column(modifier = Modifier.fillMaxSize().padding(pad).padding(horizontal = AppSpacing.lg)) {
+            Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
             total?.let { TotalBudgetCard(it, categories) }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(AppSpacing.md))
             Text("分类预算", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             MoneyBookCard(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(AppSpacing.lg)) {
                     val perCategory = states.filter { !it.isTotal }
                     if (perCategory.isEmpty()) {
                         Text("暂无分类预算，点右上角新建", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -85,25 +83,26 @@ fun BudgetScreen(onBack: () -> Unit, viewModel: BudgetViewModel = hiltViewModel(
     editFor?.let { s -> AmountDialog("修改预算", Formatters.yuanText(s.budget.amount), onConfirm = { viewModel.update(s.budget.id, it); editFor = null }, onDismiss = { editFor = null }) }
     deleteFor?.let { s -> AlertDialog(onDismissRequest = { deleteFor = null }, confirmButton = { TextButton(onClick = { viewModel.delete(s.budget.id); deleteFor = null }) { Text("删除", color = MaterialTheme.colorScheme.error) } }, dismissButton = { TextButton(onClick = { deleteFor = null }) { Text("取消") } }, title = { Text("删除预算") }, text = { Text("确定删除该预算？") }) }
 }
+}
 @Composable
 private fun TotalBudgetCard(s: BudgetState, categories: List<CategoryDomain>) {
     MoneyBookCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-        SectionTitle("总预算（${monthLabel()}）")
-        Spacer(Modifier.height(8.dp))
+        Column(modifier = Modifier.padding(AppSpacing.lg)) {
+            SectionTitle("总预算（${monthLabel()}）")
+        Spacer(Modifier.height(AppSpacing.sm))
         // R6 详情：本月预算 + 上月结余 = 本月可用
         val prevSurplus = s.budget.amount - s.prevSpent
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
             BudgetChip("本月预算", Formatters.yuanText(s.budget.amount))
             Text("+", color = MaterialTheme.colorScheme.onSurfaceVariant)
             BudgetChip("上月结余", Formatters.yuanText(prevSurplus))
             Text("=", color = MaterialTheme.colorScheme.onSurfaceVariant)
             Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("本月可用", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant); AnimatedMoney(amount = s.available, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium) }
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(AppSpacing.md))
         val budgetProgress by animateFloatAsState(targetValue = (s.usagePercent / 100f).coerceIn(0f, 1f), label = "budgetProgress")
         LinearProgressIndicator(progress = { budgetProgress }, color = if (s.over) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, trackColor = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth())
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(AppSpacing.sm))
         Row {
             Text("已用 ${Formatters.yuanText(s.spent)}", style = MaterialTheme.typography.bodyMedium, color = if (s.over) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
             Text(if (s.over) "已超支 ${Formatters.yuanText(-s.remaining)}" else "剩余 ${Formatters.yuanText(s.remaining)}", style = MaterialTheme.typography.bodyMedium, color = if (s.over) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
@@ -121,7 +120,7 @@ private fun BudgetChip(label: String, value: String) {
 @Composable
 private fun BudgetRow(s: BudgetState, categories: List<CategoryDomain>, onEdit: () -> Unit, onDelete: () -> Unit) {
     val cat = categories.firstOrNull { it.id == s.budget.categoryId }
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)) {
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CategoryIcon(cat?.icon ?: "📁", size = 22.dp, fontSize = 14.sp)
@@ -130,8 +129,8 @@ private fun BudgetRow(s: BudgetState, categories: List<CategoryDomain>, onEdit: 
                 Text(String.format(Locale.CHINA, "%.0f%%", s.usagePercent), style = MaterialTheme.typography.bodySmall, color = if (s.over) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
             }
             val itemProgress by animateFloatAsState(targetValue = (s.usagePercent / 100f).coerceIn(0f, 1f), label = "itemProgress")
-            LinearProgressIndicator(progress = { itemProgress }, color = if (s.over) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, trackColor = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth().height(8.dp))
-            Spacer(Modifier.height(4.dp))
+            LinearProgressIndicator(progress = { itemProgress }, color = if (s.over) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, trackColor = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth().height(AppSpacing.sm))
+            Spacer(Modifier.height(AppSpacing.xs))
             Text("可用 ${Formatters.yuanText(s.available)} · 已用 ${Formatters.yuanText(s.spent)}" + if (s.over) "（超支）" else "", style = MaterialTheme.typography.bodySmall, color = if (s.over) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
         }
         IconButton(onClick = onEdit) { Icon(Icons.Filled.Edit, contentDescription = "编辑") }
@@ -146,19 +145,19 @@ private fun BudgetFormDialog(categories: List<CategoryDomain>, onConfirm: (Long?
     var rollover by remember { mutableStateOf(true) }
     AlertDialog(onDismissRequest = onDismiss, confirmButton = { TextButton(enabled = (amount.toDoubleOrNull() ?: 0.0) > 0.0, onClick = { onConfirm(if (isTotal) null else categoryId, (amount.toDoubleOrNull()!! * 100).toLong(), rollover) }) { Text("确定") } }, dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } }, title = { Text("新建预算") }, text = {
         Column {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                 FilterChip(selected = isTotal, onClick = { isTotal = true; categoryId = null }, label = { Text("总预算") })
                 FilterChip(selected = !isTotal, onClick = { isTotal = false }, label = { Text("分类预算") })
             }
             if (!isTotal) {
-                Spacer(Modifier.height(8.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    categories.forEach { c -> FilterChip(selected = categoryId == c.id, onClick = { categoryId = c.id }, label = { Row(verticalAlignment = Alignment.CenterVertically) { CategoryIcon(c.icon, size = 18.dp, fontSize = 12.sp); Spacer(Modifier.width(4.dp)); Text(c.name) } }) }
+                Spacer(Modifier.height(AppSpacing.sm))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
+                    categories.forEach { c -> FilterChip(selected = categoryId == c.id, onClick = { categoryId = c.id }, label = { Row(verticalAlignment = Alignment.CenterVertically) { CategoryIcon(c.icon, size = 18.dp, fontSize = 12.sp); Spacer(Modifier.width(AppSpacing.xs)); Text(c.name) } }) }
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(AppSpacing.md))
             OutlinedTextField(value = amount, onValueChange = { amount = it }, label = { Text("预算金额(元)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("结转上月结余", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                 Switch(checked = rollover, onCheckedChange = { rollover = it })
