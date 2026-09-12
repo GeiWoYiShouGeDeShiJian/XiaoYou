@@ -11,17 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -47,8 +42,11 @@ import androidx.compose.runtime.setValue
 import com.example.jizhangruanjian.data.model.ReimbursementStatus
 import com.example.jizhangruanjian.core.util.Formatters
 import com.example.jizhangruanjian.domain.model.TransactionDisplay
+import com.example.jizhangruanjian.ui.components.AppTopBar
 import com.example.jizhangruanjian.ui.components.CategoryIcon
 import com.example.jizhangruanjian.ui.components.grayscale
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReimbursementScreen(onBack: () -> Unit, viewModel: ReimbursementViewModel = hiltViewModel()) {
@@ -57,7 +55,7 @@ fun ReimbursementScreen(onBack: () -> Unit, viewModel: ReimbursementViewModel = 
     val tabs = listOf(ReimbursementStatus.REIMBURSABLE to "待报销", ReimbursementStatus.REIMBURSED to "已报销")
     val sel = tabs.indexOfFirst { it.first == tab }.coerceAtLeast(0)
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        TopAppBar(title = { Text("报销管理") }, navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") } })
+        AppTopBar(title = "报销管理", onBack = onBack)
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         TabRow(selectedTabIndex = sel, containerColor = MaterialTheme.colorScheme.background) {
             tabs.forEachIndexed { i, (st, label) ->
@@ -77,7 +75,7 @@ fun ReimbursementScreen(onBack: () -> Unit, viewModel: ReimbursementViewModel = 
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(modifier = Modifier.fillMaxWidth().padding(AppSpacing.lg), horizontalArrangement = Arrangement.SpaceBetween) {
             Column { Text("可报销总额", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text(Formatters.yuanText(viewModel.reimbursableTotal()), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary) }
             Column(horizontalAlignment = Alignment.End) { Text("已报销总额", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text(Formatters.yuanText(viewModel.reimbursedTotal()), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.tertiary) }
         }
@@ -90,15 +88,15 @@ private fun ReimbursementRow(tx: TransactionDisplay, reimbursed: Boolean, onReim
         if (it == SwipeToDismissBoxValue.EndToStart) { if (reimbursed) onCancel() else onReimburse(); true } else false
     })
     SwipeToDismissBox(state = dismissState, enableDismissFromStartToEnd = false, enableDismissFromEndToStart = true, backgroundContent = {
-        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primaryContainer).padding(end = 24.dp), contentAlignment = Alignment.CenterEnd) { Text(if (reimbursed) "取消报销" else "标记已报销", color = MaterialTheme.colorScheme.onPrimaryContainer) }
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primaryContainer).padding(end = AppSpacing.xxl), contentAlignment = Alignment.CenterEnd) { Text(if (reimbursed) "取消报销" else "标记已报销", color = MaterialTheme.colorScheme.onPrimaryContainer) }
     }) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).grayscale().padding(horizontal = 16.dp, vertical = 12.dp)) {
-                CategoryIcon(tx.categoryIcon, size = 32.dp, fontSize = 18.sp, modifier = Modifier.padding(end = 8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).grayscale().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)) {
+                CategoryIcon(tx.categoryIcon, size = AppSize.iconXLarge, fontSize = 18.sp, modifier = Modifier.padding(end = AppSpacing.sm))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(tx.categoryName)
                     Text(Formatters.dateMd(tx.tradeDate), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Text(Formatters.yuanText(tx.amount), fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(end = 8.dp))
+                Text(Formatters.yuanText(tx.amount), fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(end = AppSpacing.sm))
                 Text(statusLabel(tx.reimbursementStatus), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
     }

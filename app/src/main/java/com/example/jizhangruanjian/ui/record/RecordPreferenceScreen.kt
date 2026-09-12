@@ -1,7 +1,10 @@
 ﻿package com.example.jizhangruanjian.ui.record
-import com.example.jizhangruanjian.ui.components.CollapsingTitleScaffold
+import com.example.jizhangruanjian.ui.components.AppCard
+import com.example.jizhangruanjian.ui.components.AppTopBar
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,17 +15,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -78,6 +83,7 @@ private fun normalizeOrder(pref: String, items: Map<String, String>): List<Strin
     return parsed + items.keys.filter { it !in parsed }
 }
 // 偏好设置页（记账页右上角入口），与备注设置页同结构：Scaffold+大标题+分区
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordPreferenceScreen(onBack: () -> Unit, onOpenNoteSettings: () -> Unit = {}, canRememberKeyword: Boolean = false, onRememberKeyword: () -> Unit = {}) {
     val vm: RecordPrefsViewModel = hiltViewModel()
@@ -89,8 +95,9 @@ fun RecordPreferenceScreen(onBack: () -> Unit, onOpenNoteSettings: () -> Unit = 
         RecordChipsOrderScreen(vm = vm, prefs = prefs, onBack = { chipsPage = false })
         return
     }
-    CollapsingTitleScaffold(title = "偏好设置", onBack = onBack) {
-            Text("记账", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "偏好设置", onBack = onBack) }) { pad ->
+        Column(Modifier.padding(pad).fillMaxWidth().verticalScroll(rememberScrollState())) {
+            Text("记账", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm))
             NavRow("初始选中类型", value = typeLabels[prefs["rp_init_type"] ?: "EXPENSE"] ?: "支出") { dialog = "type" }
             NavRow("常用类别数量", value = prefs["rp_fav_count"] ?: "8") { dialog = "fav" }
             NavRow("备注设置", subtitle = "历史备注、常用备注设置") { onOpenNoteSettings() }
@@ -99,25 +106,26 @@ fun RecordPreferenceScreen(onBack: () -> Unit, onOpenNoteSettings: () -> Unit = 
             SwitchRow("复制保留时间", "「复制」明细时，日期与时间保持不变", prefs["rp_copy_keep_time"] == "1") { vm.set("rp_copy_keep_time", if (it) "1" else "0") }
             SwitchRow("标签默认多选", "添加标签时默认使用「多选」模式", prefs["rp_tag_multi"] == "1") { vm.set("rp_tag_multi", if (it) "1" else "0") }
             NavRow("记忆备注关键词", subtitle = "将当前输入的备注记为分类关键词", enabled = canRememberKeyword) { onRememberKeyword() }
-            Text("图片", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+            Text("图片", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm))
             NavRow("账单图片质量", value = if (prefs["rp_img_quality"] == "NORMAL") "标清" else "高清") { dialog = "quality" }
             SwitchRow("自动删除相册图片", "从相册添加账单图片后，自动删除相册原图", prefs["rp_del_album"] == "1") { vm.set("rp_del_album", if (it) "1" else "0") }
-            Text("记忆", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+            Text("记忆", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm))
             SwitchRow("自动记忆账户", "新建明细选择类别后，自动切换上次使用的账户", prefs["rp_mem_account"] != "0") { vm.set("rp_mem_account", if (it) "1" else "0") }
             SwitchRow("自动记忆角色", "新建明细选择类别后，自动切换上次使用的角色", prefs["rp_mem_role"] != "0") { vm.set("rp_mem_role", if (it) "1" else "0") }
-            Text("键盘", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+            Text("键盘", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm))
             SwitchRow("数字键盘触感反馈", "", prefs["rp_haptic"] != "0") { vm.set("rp_haptic", if (it) "1" else "0") }
             SwitchRow("默认显示+-×÷按钮", "", prefs["rp_show_ops"] == "1") { vm.set("rp_show_ops", if (it) "1" else "0") }
             SwitchRow("倒序排列数字按键", "", prefs["rp_reverse"] == "1") { vm.set("rp_reverse", if (it) "1" else "0") }
             NavRow("按键大小", value = when (prefs["rp_key_size"]) { "LARGE" -> "较大"; "SMALL" -> "较小"; else -> "默认" }) { dialog = "keysize" }
-            Text("定位", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { vm.set("rp_geo", if (prefs["rp_geo"] == "1") "0" else "1") }.padding(horizontal = 20.dp, vertical = 8.dp)) {
+            Text("定位", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { vm.set("rp_geo", if (prefs["rp_geo"] == "1") "0" else "1") }.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm)) {
                 Text("保存地理位置信息", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
                 Spacer(Modifier.width(6.dp))
                 Icon(Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.weight(1f))
                 Switch(checked = prefs["rp_geo"] == "1", onCheckedChange = { vm.set("rp_geo", if (it) "1" else "0") })
             }
+        }
     }
     when (dialog) {
         "type" -> RadioDialog(title = "初始选中类型", options = typeLabels, selected = prefs["rp_init_type"] ?: "EXPENSE", onPick = { vm.set("rp_init_type", it); dialog = "" })
@@ -128,33 +136,35 @@ fun RecordPreferenceScreen(onBack: () -> Unit, onOpenNoteSettings: () -> Unit = 
     }
 }
 // 记账选项页：两排选项的显隐（勾选）与排序（按住 ≡ 拖动），返回时保存
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RecordChipsOrderScreen(vm: RecordPrefsViewModel, prefs: Map<String, String>, onBack: () -> Unit) {
     var order1 by remember { mutableStateOf(normalizeOrder(prefs["rp_chip_order"] ?: "", row1Items)) }
     var hide1 by remember { mutableStateOf((prefs["rp_chip_hide"] ?: "").split(",").filter { it.isNotBlank() }) }
     var order2 by remember { mutableStateOf(normalizeOrder(prefs["rp_row2_order"] ?: "", row2Items)) }
     var hide2 by remember { mutableStateOf((prefs["rp_row2_hide"] ?: "").split(",").filter { it.isNotBlank() }) }
-    CollapsingTitleScaffold(title = "记账选项", onBack = {
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "记账选项", onBack = {
         vm.set("rp_chip_order", order1.joinToString(",")); vm.set("rp_chip_hide", hide1.joinToString(","))
         vm.set("rp_row2_order", order2.joinToString(",")); vm.set("rp_row2_hide", hide2.joinToString(","))
         onBack()
-    }) {
+    }) }) { pad ->
+        Column(Modifier.padding(pad).fillMaxWidth().verticalScroll(rememberScrollState())) {
             ChipRowCard("第 1 排", order1, hide1, row1Items, onMove = { f, t -> order1 = order1.toMutableList().apply { add(t, removeAt(f)) } }, onToggle = { k, c -> hide1 = if (c) hide1 - k else hide1 + k })
             ChipRowCard("第 2 排", order2, hide2, row2Items, onMove = { f, t -> order2 = order2.toMutableList().apply { add(t, removeAt(f)) } }, onToggle = { k, c -> hide2 = if (c) hide2 - k else hide2 + k })
-            Text("按住右侧的\"≡\"上下拖动排序", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp))
+            Text("按住右侧的\"≡\"上下拖动排序", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.lg))
+        }
     }
 }
 @Composable
 private fun ChipRowCard(title: String, order: List<String>, hidden: List<String>, items: Map<String, String>, onMove: (Int, Int) -> Unit, onToggle: (String, Boolean) -> Unit) {
     val listState = rememberLazyListState()
     val reorderState = rememberReorderableLazyColumnState(listState) { from, to -> onMove(from.index, to.index) }
-    Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)) {
-        Column(Modifier.padding(vertical = 6.dp)) {
-            Text(title, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+    AppCard(shape = MaterialTheme.shapes.large, containerColor = MaterialTheme.colorScheme.surfaceContainerLow, contentPadding = PaddingValues(vertical = 6.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.md, vertical = 6.dp)) {
+            Text(title, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm))
             LazyColumn(state = listState, modifier = Modifier.height((order.size * 56).dp), userScrollEnabled = false) {
                 items(order, key = { it }) { key ->
                     ReorderableItem(reorderState, key = key) { dragging ->
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 8.dp).zIndex(if (dragging) 1f else 0f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(52.dp).padding(horizontal = AppSpacing.sm).zIndex(if (dragging) 1f else 0f)) {
                             Checkbox(checked = key !in hidden, onCheckedChange = { onToggle(key, it) })
                             Text(items[key] ?: key, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                             Icon(Icons.Filled.Menu, contentDescription = "拖动排序", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp).longPressDraggableHandle())
@@ -162,12 +172,11 @@ private fun ChipRowCard(title: String, order: List<String>, hidden: List<String>
                     }
                 }
             }
-        }
     }
 }
 @Composable
 private fun NavRow(title: String, subtitle: String = "", value: String = "", enabled: Boolean = true, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(enabled = enabled) { onClick() }.padding(horizontal = 20.dp, vertical = 16.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(enabled = enabled) { onClick() }.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.lg)) {
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)
             if (subtitle.isNotBlank()) Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -178,12 +187,12 @@ private fun NavRow(title: String, subtitle: String = "", value: String = "", ena
 }
 @Composable
 private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onChange(!checked) }.padding(horizontal = 20.dp, vertical = 8.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onChange(!checked) }.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm)) {
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
             if (subtitle.isNotBlank()) Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(AppSpacing.md))
         Switch(checked = checked, onCheckedChange = { onChange(it) })
     }
 }

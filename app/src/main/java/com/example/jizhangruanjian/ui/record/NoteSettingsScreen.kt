@@ -1,10 +1,10 @@
 ﻿package com.example.jizhangruanjian.ui.record
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,18 +16,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
-import com.example.jizhangruanjian.ui.components.CollapsingTitleScaffold
+import com.example.jizhangruanjian.ui.components.AppCard
+import com.example.jizhangruanjian.ui.components.AppTopBar
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -42,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -123,6 +123,7 @@ class NoteSettingsViewModel @Inject constructor(
         return categories.firstOrNull { it.parentId == parentId && it.name == slotName }?.id ?: base
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteSettingsScreen(onBack: () -> Unit, viewModel: NoteSettingsViewModel = androidx.hilt.navigation.compose.hiltViewModel()) {
     var manage by remember { mutableStateOf(false) }
@@ -130,55 +131,56 @@ fun NoteSettingsScreen(onBack: () -> Unit, viewModel: NoteSettingsViewModel = an
     val showHistory by viewModel.showHistory.collectAsStateWithLifecycle()
     val afterInput by viewModel.historyAfterInput.collectAsStateWithLifecycle()
     val showCommon by viewModel.showCommon.collectAsStateWithLifecycle()
-    CollapsingTitleScaffold(title = "备注设置", onBack = onBack) {
-            Text("历史备注", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "备注设置", onBack = onBack) }) { pad ->
+        Column(Modifier.padding(pad).fillMaxSize().verticalScroll(rememberScrollState())) {
+            Text("历史备注", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm))
             SettingRow("显示历史备注", "输入备注时，自动显示相关历史备注以供选择", showHistory) { viewModel.setShowHistory(it) }
             SettingRow("仅输入后显示历史备注", "未输入备注时不显示最近备注记录", afterInput) { viewModel.setHistoryAfterInput(it) }
-            Text("常用备注", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+            Text("常用备注", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm))
             SettingRow("显示常用备注", "未输入备注时，优先显示常用备注以供选择", showCommon) { viewModel.setShowCommon(it) }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { manage = true }.padding(horizontal = 20.dp, vertical = 16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { manage = true }.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.lg)) {
                 Text("常用备注管理", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+        }
     }
 }
 @Composable
 private fun SettingRow(title: String, sub: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm)) {
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
             Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(AppSpacing.md))
         Switch(checked = checked, onCheckedChange = onChange)
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CommonNotesManageScreen(onBack: () -> Unit, viewModel: NoteSettingsViewModel) {
     val notes by viewModel.commonNotes.collectAsStateWithLifecycle()
     var showAdd by remember { mutableStateOf(false) }
     var input by remember { mutableStateOf("") }
     var scopeEditFor by remember { mutableStateOf<String?>(null) }
-    Scaffold(containerColor = MaterialTheme.colorScheme.background, floatingActionButton = {
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "常用备注", onBack = onBack) }, floatingActionButton = {
         ExtendedFloatingActionButton(onClick = { input = ""; showAdd = true }, containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer) {
             Icon(Icons.Filled.Add, null); Spacer(Modifier.width(6.dp)); Text("添加备注")
         }
     }) { pad ->
         Column(Modifier.fillMaxSize().padding(pad)) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") }
-                Text("常用备注", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             notes.forEach { n ->
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(horizontal = 16.dp, vertical = 18.dp)) {
-                    Text(n, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1)
-                    Icon(Icons.Filled.Settings, "使用范围", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp).clickable { scopeEditFor = n })
-                    Spacer(Modifier.width(14.dp))
-                    Icon(Icons.Filled.Delete, "删除", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(22.dp).clickable { viewModel.removeCommonNote(n) })
+                AppCard(shape = RoundedCornerShape(14.dp), containerColor = MaterialTheme.colorScheme.surfaceContainerHigh, contentPadding = PaddingValues(horizontal = AppSpacing.lg, vertical = 18.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.md, vertical = 6.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(n, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), maxLines = 1)
+                        Icon(Icons.Filled.Settings, "使用范围", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp).clickable { scopeEditFor = n })
+                        Spacer(Modifier.width(14.dp))
+                        Icon(Icons.Filled.Delete, "删除", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(22.dp).clickable { viewModel.removeCommonNote(n) })
+                    }
                 }
             }
-            if (notes.isEmpty()) Text("暂无常用备注", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(20.dp))
+            if (notes.isEmpty()) Text("暂无常用备注", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(AppSpacing.xl))
         }
     }
     if (showAdd) {

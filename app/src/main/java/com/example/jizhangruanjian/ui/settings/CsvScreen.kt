@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,7 +34,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,9 +42,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -71,6 +69,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.jizhangruanjian.core.parser.OfficialBillParser
 import com.example.jizhangruanjian.data.model.Ledger
+import com.example.jizhangruanjian.ui.components.AppButton
+import com.example.jizhangruanjian.ui.components.AppButtonVariant
+import com.example.jizhangruanjian.ui.components.AppTopBar
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 // 账单导入与导出：双 Tab（导入来源选择 + 导出时间范围）
 private data class ImportSource(val label: String, val button: String, val icon: ImageVector, val color: Color, val help: String)
 private val SOURCES = listOf(
@@ -141,90 +144,85 @@ fun CsvScreen(onBack: () -> Unit, onAddLedger: () -> Unit = {}, onManageLedger: 
             else -> Pair(null, null)
         }
     }
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).statusBarsPadding()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Text("账单导入与导出", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            IconButton(onClick = { showHelp = true }) { Icon(Icons.Filled.HelpOutline, contentDescription = "帮助") }
+    Scaffold(containerColor = MaterialTheme.colorScheme.surface, topBar = {
+        Column {
+            AppTopBar(title = "账单导入与导出", onBack = onBack, actions = { IconButton(onClick = { showHelp = true }) { Icon(Icons.Filled.HelpOutline, contentDescription = "帮助") } })
+            TabRow(selectedTabIndex = tab) {
+                Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("账单导入") })
+                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("账单导出") })
+            }
         }
-        TabRow(selectedTabIndex = tab) {
-            Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("账单导入") })
-            Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("账单导出") })
-        }
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+    }) { pad ->
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(pad).padding(AppSpacing.lg)) {
             if (tab == 0) {
                 val source = SOURCES[sourceIndex]
-                Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                Column(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceVariant)) {
                     SOURCES.forEachIndexed { i, s ->
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { sourceIndex = i }.padding(horizontal = 12.dp, vertical = 6.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { sourceIndex = i }.padding(horizontal = AppSpacing.md, vertical = 6.dp)) {
                             RadioButton(selected = sourceIndex == i, onClick = { sourceIndex = i })
-                            Spacer(Modifier.width(8.dp))
-                            Icon(s.icon, contentDescription = s.label, tint = s.color, modifier = Modifier.size(24.dp))
+                            Spacer(Modifier.width(AppSpacing.sm))
+                            Icon(s.icon, contentDescription = s.label, tint = s.color, modifier = Modifier.size(AppSize.iconLarge))
                             Spacer(Modifier.width(10.dp))
                             Text(s.label, style = MaterialTheme.typography.bodyLarge)
                         }
                     }
-                    Text(source.help, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp))
+                    Text(source.help, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = AppSpacing.md))
                     if (sourceIndex == SOURCES.lastIndex) {
                         Spacer(Modifier.height(10.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                            OutlinedButton(onClick = { viewModel.writeLocal("通用模板_${System.currentTimeMillis()}.csv", TEMPLATE_CSV.toByteArray()) }) { Text("获取模板文件") }
+                            AppButton(text = "获取模板文件", onClick = { viewModel.writeLocal("通用模板_${System.currentTimeMillis()}.csv", TEMPLATE_CSV.toByteArray()) }, variant = AppButtonVariant.Outlined)
                         }
-                        Text("点击获取后分享至电脑，请根据模板文件内的要求将数据填入模板（不要新建文件），再传回手机进行导入。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp))
+                        Text("点击获取后分享至电脑，请根据模板文件内的要求将数据填入模板（不要新建文件），再传回手机进行导入。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = AppSpacing.md))
                     }
                     Spacer(Modifier.height(10.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showLedgerPicker = true }.padding(horizontal = 12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showLedgerPicker = true }.padding(horizontal = AppSpacing.md)) {
                         Text("导入至", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                         Text(targetName, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
                         Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     if (sourceIndex != SOURCES.lastIndex) {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.md)) {
                             Checkbox(checked = onlyIncomeExpense, onCheckedChange = { onlyIncomeExpense = it })
                             Text("只导入支出和收入类型", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
-                    Button(onClick = { importLauncher.launch(arrayOf("text/*", "application/octet-stream")) }, modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                        Text(source.button)
-                    }
-                    if (importing) { Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.Center) { CircularProgressIndicator(modifier = Modifier.size(24.dp)) } }
+                    AppButton(text = source.button, onClick = { importLauncher.launch(arrayOf("text/*", "application/octet-stream")) }, modifier = Modifier.fillMaxWidth().padding(AppSpacing.md))
+                    if (importing) { Row(modifier = Modifier.fillMaxWidth().padding(bottom = AppSpacing.md), horizontalArrangement = Arrangement.Center) { CircularProgressIndicator(modifier = Modifier.size(AppSize.iconLarge)) } }
                 }
-                Spacer(Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant).clickable { showHistory = true }.padding(horizontal = 16.dp, vertical = 14.dp)) {
+                Spacer(Modifier.height(AppSpacing.md))
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceVariant).clickable { showHistory = true }.padding(horizontal = AppSpacing.lg, vertical = 14.dp)) {
                     Text("已导入的账单", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                     Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
-                Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { pickerTarget = 1; showLedgerPicker = true }.padding(horizontal = 12.dp, vertical = 12.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { pickerTarget = 1; showLedgerPicker = true }.padding(horizontal = AppSpacing.md, vertical = AppSpacing.md)) {
                         Text("导出账本", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                         Text(exportName, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
                         Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    Text("时间范围", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(horizontal = 12.dp))
-                    Spacer(Modifier.height(8.dp))
-                    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("时间范围", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(horizontal = AppSpacing.md))
+                    Spacer(Modifier.height(AppSpacing.sm))
+                    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.md), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                         listOf("本月", "本年", "全部", "自定义").forEachIndexed { i, label ->
                             FilterChip(selected = rangeIndex == i, onClick = { rangeIndex = i }, label = { Text(label) })
                         }
                     }
                     if (rangeIndex == 3) {
-                        Spacer(Modifier.height(8.dp))
-                        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Spacer(Modifier.height(AppSpacing.sm))
+                        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.md), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                             OutlinedTextField(value = customStart, onValueChange = { customStart = it }, label = { Text("开始日期") }, placeholder = { Text("2026-01-01") }, singleLine = true, modifier = Modifier.weight(1f))
                             OutlinedTextField(value = customEnd, onValueChange = { customEnd = it }, label = { Text("结束日期") }, placeholder = { Text("2026-12-31") }, singleLine = true, modifier = Modifier.weight(1f))
                         }
                     }
-                    Button(onClick = { val (s, e) = range(); viewModel.exportCsvToLocal(s, e, exportId, if (exportFields.size == 7) null else exportFields.toList()) }, modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                        Text("导出为Excel")
-                    }
+                    AppButton(text = "导出为Excel", onClick = { val (s, e) = range(); viewModel.exportCsvToLocal(s, e, exportId, if (exportFields.size == 7) null else exportFields.toList()) }, modifier = Modifier.fillMaxWidth().padding(AppSpacing.md))
                 }
-                Spacer(Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant).clickable { showBanner = true; showAdvanced = true }.padding(horizontal = 16.dp, vertical = 14.dp)) {
+                Spacer(Modifier.height(AppSpacing.md))
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceVariant).clickable { showBanner = true; showAdvanced = true }.padding(horizontal = AppSpacing.lg, vertical = 14.dp)) {
                     Text("高级设置", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                     Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(AppSpacing.lg))
                 Text("1. 导出的账单文件中包含 6 张表格，分别为支出、收入、转账、借贷、应付款、应收款。文件格式为xls，可通过Excel或WPS另存为csv等其他格式。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(6.dp))
                 Text("2. 对于仅需导出特定数据的场景，可通过首页搜索、筛选等方式查询明细，长按明细 - 批量操作 - 导出。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -269,8 +267,8 @@ fun CsvScreen(onBack: () -> Unit, onAddLedger: () -> Unit = {}, onManageLedger: 
     }
     if (showLedgerPicker) {
         ModalBottomSheet(onDismissRequest = { showLedgerPicker = false }) {
-            Column(modifier = Modifier.padding(bottom = 24.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+            Column(modifier = Modifier.padding(bottom = AppSpacing.xxl)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.sm)) {
                     IconButton(onClick = { showLedgerPicker = false }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
                     Text("账本", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     IconButton(onClick = { showLedgerSearch = !showLedgerSearch }) { Icon(Icons.Filled.Search, contentDescription = "搜索") }
@@ -278,22 +276,22 @@ fun CsvScreen(onBack: () -> Unit, onAddLedger: () -> Unit = {}, onManageLedger: 
                     IconButton(onClick = { showLedgerPicker = false; onManageLedger() }) { Icon(Icons.Filled.Settings, contentDescription = "账本管理") }
                 }
                 if (showLedgerSearch) {
-                    OutlinedTextField(value = ledgerSearch, onValueChange = { ledgerSearch = it }, label = { Text("搜索账本") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+                    OutlinedTextField(value = ledgerSearch, onValueChange = { ledgerSearch = it }, label = { Text("搜索账本") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg))
                 }
                 LazyColumn(modifier = Modifier.height(280.dp)) {
                     items(ledgers.filter { ledgerSearch.isBlank() || it.name.contains(ledgerSearch) }, key = { it.id }) { l ->
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { if (pickerTarget == 0) targetLedgerId = l.id else exportLedgerId = l.id; showLedgerPicker = false }.padding(horizontal = 16.dp, vertical = 10.dp)) {
-                            Box(modifier = Modifier.size(36.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-                                Icon(Icons.Filled.Description, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { if (pickerTarget == 0) targetLedgerId = l.id else exportLedgerId = l.id; showLedgerPicker = false }.padding(horizontal = AppSpacing.lg, vertical = 10.dp)) {
+                            Box(modifier = Modifier.size(36.dp).clip(MaterialTheme.shapes.small).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Filled.Description, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(AppSize.iconSize))
                             }
-                            Spacer(Modifier.width(12.dp))
+                            Spacer(Modifier.width(AppSpacing.md))
                             Text(l.name, style = MaterialTheme.typography.bodyLarge)
                         }
                     }
                     item {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showLedgerPicker = false; onAddLedger() }.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showLedgerPicker = false; onAddLedger() }.padding(horizontal = AppSpacing.lg, vertical = 10.dp)) {
                             Icon(Icons.Filled.AddCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
-                            Spacer(Modifier.width(12.dp))
+                            Spacer(Modifier.width(AppSpacing.md))
                             Text("添加账本", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
                         }
                     }
@@ -303,14 +301,14 @@ fun CsvScreen(onBack: () -> Unit, onAddLedger: () -> Unit = {}, onManageLedger: 
     }
     if (showAdvanced) {
         ModalBottomSheet(onDismissRequest = { showAdvanced = false }) {
-            Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp)) {
+            Column(modifier = Modifier.padding(start = AppSpacing.lg, end = AppSpacing.lg, bottom = AppSpacing.xxl)) {
                 if (showBanner) {
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(AppSpacing.md))
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.secondaryContainer).padding(horizontal = 10.dp, vertical = 10.dp)) {
                         Icon(Icons.Filled.Lightbulb, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(AppSpacing.sm))
                         Text("以下设置对「长按明细 - 批量操作 - 导出」同样生效", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.weight(1f))
-                        IconButton(onClick = { showBanner = false }, modifier = Modifier.size(20.dp)) { Icon(Icons.Filled.Close, contentDescription = "关闭", tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(16.dp)) }
+                        IconButton(onClick = { showBanner = false }, modifier = Modifier.size(AppSize.iconSize)) { Icon(Icons.Filled.Close, contentDescription = "关闭", tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(AppSize.iconSmall)) }
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showFieldDialog = true }.padding(vertical = 14.dp)) {

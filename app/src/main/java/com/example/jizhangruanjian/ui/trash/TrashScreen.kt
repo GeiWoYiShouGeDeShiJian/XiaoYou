@@ -13,24 +13,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.ReceiptLong
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,6 +44,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.jizhangruanjian.core.util.Formatters
 import com.example.jizhangruanjian.data.model.TransactionType
 import com.example.jizhangruanjian.domain.model.TransactionDisplay
+import com.example.jizhangruanjian.ui.components.AppButton
+import com.example.jizhangruanjian.ui.components.AppButtonVariant
+import com.example.jizhangruanjian.ui.components.AppTopBar
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 private val CARD_BG = Color(0xFFF3F4F6)
 private val INCOME_GREEN = SemanticColors.IncomeGreen
 private val EXPENSE_RED = SemanticColors.ExpenseRed
@@ -64,20 +64,17 @@ fun TrashScreen(onBack: () -> Unit, viewModel: TrashViewModel = hiltViewModel())
     val current = section
     BackHandler(enabled = current != null) { section = null }
     if (current == null) {
-        Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).statusBarsPadding().padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-                Spacer(Modifier.width(4.dp))
-                Text("回收站", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Scaffold(containerColor = MaterialTheme.colorScheme.surface, topBar = { AppTopBar(title = "回收站", onBack = onBack) }) { pad ->
+            Column(modifier = Modifier.fillMaxSize().padding(pad).padding(horizontal = AppSpacing.lg)) {
+                Spacer(Modifier.height(AppSpacing.lg))
+                TrashEntryCard(Icons.Filled.Description, "账本", trashLedgers.size) { section = TrashSection.LEDGER }
+                Spacer(Modifier.height(10.dp))
+                TrashEntryCard(Icons.Filled.AccountBalanceWallet, "账户", trashAccounts.size) { section = TrashSection.ACCOUNT }
+                Spacer(Modifier.height(10.dp))
+                TrashEntryCard(Icons.Filled.ReceiptLong, "明细", trashTx.size) { section = TrashSection.TX }
+                Spacer(Modifier.height(AppSpacing.xl))
+                Text("已删除的数据会被存放在回收站中", style = MaterialTheme.typography.bodySmall, color = Color(0xFF9AA0A6), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
             }
-            Spacer(Modifier.height(16.dp))
-            TrashEntryCard(Icons.Filled.Description, "账本", trashLedgers.size) { section = TrashSection.LEDGER }
-            Spacer(Modifier.height(10.dp))
-            TrashEntryCard(Icons.Filled.AccountBalanceWallet, "账户", trashAccounts.size) { section = TrashSection.ACCOUNT }
-            Spacer(Modifier.height(10.dp))
-            TrashEntryCard(Icons.Filled.ReceiptLong, "明细", trashTx.size) { section = TrashSection.TX }
-            Spacer(Modifier.height(20.dp))
-            Text("已删除的数据会被存放在回收站中", style = MaterialTheme.typography.bodySmall, color = Color(0xFF9AA0A6), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
     } else {
         when (current) {
@@ -99,8 +96,8 @@ private fun trashColor(tx: TransactionDisplay): Color = when (tx.type) {
 }
 @Composable
 private fun TrashEntryCard(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, count: Int, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(CARD_BG).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 18.dp)) {
-        Icon(icon, contentDescription = label, modifier = Modifier.size(24.dp), tint = Color(0xFF333333))
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(CARD_BG).clickable(onClick = onClick).padding(horizontal = AppSpacing.lg, vertical = 18.dp)) {
+        Icon(icon, contentDescription = label, modifier = Modifier.size(AppSize.iconLarge), tint = Color(0xFF333333))
         Spacer(Modifier.width(14.dp))
         Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Text(count.toString(), style = MaterialTheme.typography.bodyLarge, color = Color(0xFF666666))
@@ -112,16 +109,12 @@ private fun TrashListScreen(title: String, onBack: () -> Unit, items: List<Trash
     val selected = remember { mutableStateListOf<Long>() }
     val allSelected = items.isNotEmpty() && selected.size == items.size
     val hasSelection = selected.isNotEmpty()
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).statusBarsPadding()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Spacer(Modifier.width(4.dp))
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        }
-        LazyColumn(modifier = Modifier.weight(1f).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Scaffold(containerColor = MaterialTheme.colorScheme.surface, topBar = { AppTopBar(title = title, onBack = onBack) }) { pad ->
+        Column(modifier = Modifier.fillMaxSize().padding(pad)) {
+            LazyColumn(modifier = Modifier.weight(1f).padding(horizontal = AppSpacing.lg), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             items(items, key = { it.id }) { row ->
                 val checked = row.id in selected
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(CARD_BG).clickable { if (checked) selected.remove(row.id) else selected.add(row.id) }.padding(horizontal = 8.dp, vertical = 10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(CARD_BG).clickable { if (checked) selected.remove(row.id) else selected.add(row.id) }.padding(horizontal = AppSpacing.sm, vertical = 10.dp)) {
                     Checkbox(checked = checked, onCheckedChange = { if (it) selected.add(row.id) else selected.remove(row.id) }, colors = CheckboxDefaults.colors(checkedColor = Color(0xFF333333)))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(row.title, style = MaterialTheme.typography.bodyLarge)
@@ -135,13 +128,14 @@ private fun TrashListScreen(title: String, onBack: () -> Unit, items: List<Trash
                 }
             }
         }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).navigationBarsPadding().padding(horizontal = AppSpacing.lg, vertical = 10.dp)) {
             Checkbox(checked = allSelected, onCheckedChange = { if (it) { selected.clear(); items.forEach { r -> selected.add(r.id) } } else selected.clear() }, colors = CheckboxDefaults.colors(checkedColor = Color(0xFF333333)))
             Text("全选", style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.weight(1f))
-            OutlinedButton(onClick = { onDelete(selected.toList()); selected.clear() }, enabled = hasSelection, shape = RoundedCornerShape(20.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF666666), disabledContentColor = Color(0xFFBBBBBB))) { Text("彻底删除") }
-            Spacer(Modifier.width(12.dp))
-            Button(onClick = { onRestore(selected.toList()); selected.clear() }, enabled = hasSelection, shape = RoundedCornerShape(20.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))) { Text("还原数据") }
+            AppButton(text = "彻底删除", onClick = { onDelete(selected.toList()); selected.clear() }, enabled = hasSelection, variant = AppButtonVariant.Outlined)
+            Spacer(Modifier.width(AppSpacing.md))
+            AppButton(text = "还原数据", onClick = { onRestore(selected.toList()); selected.clear() }, enabled = hasSelection, variant = AppButtonVariant.Primary)
         }
     }
+}
 }

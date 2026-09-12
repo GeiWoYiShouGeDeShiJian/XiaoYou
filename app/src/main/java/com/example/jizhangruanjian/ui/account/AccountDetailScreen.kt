@@ -12,14 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Check
@@ -32,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -61,7 +59,12 @@ import com.example.jizhangruanjian.domain.model.AccountDomain
 import com.example.jizhangruanjian.domain.model.AccountGroupDomain
 import com.example.jizhangruanjian.domain.model.TransactionDisplay
 import com.example.jizhangruanjian.core.util.Formatters
+import com.example.jizhangruanjian.ui.components.AppButton
+import com.example.jizhangruanjian.ui.components.AppButtonVariant
+import com.example.jizhangruanjian.ui.components.AppTopBar
 import com.example.jizhangruanjian.ui.components.CategoryIcon
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.YearMonth
@@ -127,39 +130,38 @@ fun AccountDetailScreen(viewModel: AccountDetailViewModel = hiltViewModel(), acc
     var balanceDialog by remember { mutableStateOf(false) }
     LaunchedEffect(accountId) { viewModel.load(accountId) }
     val acc = account ?: return
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Text(acc.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            TextButton(onClick = onEdit) { Text("编辑", color = MaterialTheme.colorScheme.primary) }
-        }
-        Box(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Brush.linearGradient(listOf(Color(0xFFBBD7F2), Color(0xFF9EC2EA)))).padding(20.dp)) {
-            Column {
-                Text("人民币余额", color = Color(0xFF2C4E70), fontSize = 13.sp)
-                Spacer(Modifier.height(6.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(Formatters.yuanText(acc.balance), color = Color(0xFF1A3A5C), fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.width(8.dp))
-                    Icon(Icons.Filled.Edit, contentDescription = "修改余额", tint = Color(0xFF2C4E70), modifier = Modifier.size(16.dp).clickable { balanceDialog = true })
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = acc.name, onBack = onBack, actions = { TextButton(onClick = onEdit) { Text("编辑", color = MaterialTheme.colorScheme.primary) } }) }) { pad ->
+            Column(modifier = Modifier.fillMaxSize().padding(pad)) {
+                Box(modifier = Modifier.padding(horizontal = AppSpacing.lg).fillMaxWidth().clip(MaterialTheme.shapes.extraLarge).background(Brush.linearGradient(listOf(Color(0xFFBBD7F2), Color(0xFF9EC2EA)))).padding(AppSpacing.xl)) {
+                    Column {
+                        Text("人民币余额", color = Color(0xFF2C4E70), fontSize = 13.sp)
+                        Spacer(Modifier.height(6.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(Formatters.yuanText(acc.balance), color = Color(0xFF1A3A5C), fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.width(AppSpacing.sm))
+                            Icon(Icons.Filled.Edit, contentDescription = "修改余额", tint = Color(0xFF2C4E70), modifier = Modifier.size(AppSize.iconSmall).clickable { balanceDialog = true })
+                        }
+                        Spacer(Modifier.height(AppSpacing.lg))
+                        Row {
+                            Text("流入 ", color = Color(0xFF2C4E70), fontSize = 14.sp)
+                            Text(Formatters.yuanText(totalIn), color = Color(0xFF1A3A5C), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Spacer(Modifier.width(AppSpacing.lg))
+                            Text("流出 ", color = Color(0xFF2C4E70), fontSize = 14.sp)
+                            Text(Formatters.yuanText(totalOut), color = Color(0xFF1A3A5C), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
                 }
-                Spacer(Modifier.height(16.dp))
-                Row {
-                    Text("流入 ", color = Color(0xFF2C4E70), fontSize = 14.sp)
-                    Text(Formatters.yuanText(totalIn), color = Color(0xFF1A3A5C), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.width(16.dp))
-                    Text("流出 ", color = Color(0xFF2C4E70), fontSize = 14.sp)
-                    Text(Formatters.yuanText(totalOut), color = Color(0xFF1A3A5C), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(AppSpacing.md))
+                LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = AppSpacing.md), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    groups.forEach { g ->
+                        item(key = "h${g.ym}") {
+                            MonthHeader(g)
+                        }
+                    }
+                    item { Spacer(Modifier.height(30.dp)) }
                 }
             }
-        }
-        Spacer(Modifier.height(12.dp))
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            groups.forEach { g ->
-                item(key = "h${g.ym}") {
-                    MonthHeader(g)
-                }
-            }
-            item { Spacer(Modifier.height(30.dp)) }
         }
     }
     if (balanceDialog) {
@@ -172,7 +174,7 @@ fun AccountDetailScreen(viewModel: AccountDetailViewModel = hiltViewModel(), acc
 @Composable
 private fun MonthHeader(g: AccMonthGroup) {
     var expanded by remember { mutableStateOf(true) }
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surface).clickable { expanded = !expanded }.padding(horizontal = 16.dp, vertical = 10.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surface).clickable { expanded = !expanded }.padding(horizontal = AppSpacing.lg, vertical = 10.dp)) {
         Text("${g.ym.year}-${g.ym.monthValue.toString().padStart(2, '0')}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
         Spacer(Modifier.weight(1f))
         Column(horizontalAlignment = Alignment.End) {
@@ -185,7 +187,7 @@ private fun MonthHeader(g: AccMonthGroup) {
                 Text(Formatters.yuanText(g.outflow), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
             }
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(AppSpacing.md))
         Text(Formatters.yuanText(g.inflow - g.outflow), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
         Icon(if (expanded) Icons.Filled.ArrowDropDown else Icons.Filled.ArrowDropUp, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
@@ -198,9 +200,9 @@ private fun TxRow(t: TransactionDisplay, balanceAfter: Long) {
     val dt = Instant.ofEpochMilli(t.tradeDate).atZone(ZoneId.systemDefault())
     val inflow = t.type == TransactionType.INCOME
     val amtColor = if (inflow) SemanticColors.IncomeGreen else SemanticColors.ExpenseRed
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surface).padding(horizontal = 14.dp, vertical = 10.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surface).padding(horizontal = 14.dp, vertical = 10.dp)) {
         CategoryIcon(t.categoryIcon.ifBlank { "💵" }, size = 36.dp, fontSize = 16.sp, fallbackContainer = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(AppSpacing.md))
         Column(modifier = Modifier.weight(1f)) {
             Text(t.note.ifBlank { t.categoryName.ifBlank { t.type.name } }, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
             Text("%02d-%02d %02d:%02d".format(dt.monthValue, dt.dayOfMonth, dt.hour, dt.minute), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -268,36 +270,33 @@ fun EditAccountScreen(viewModel: EditAccountViewModel = hiltViewModel(), account
     var balanceDialog by remember { mutableStateOf(false) }
     var deleteConfirm by remember { mutableStateOf(false) }
     var pickLedgers by remember { mutableStateOf(false) }
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Spacer(Modifier.weight(1f))
-            IconButton(onClick = { viewModel.save(accountId, fName, groupId, fIncludeNet, fHidden, fAutoHide, fNote, fExtra, fInitial) { onBack() } }) { Icon(Icons.Filled.Check, contentDescription = "保存") }
-        }
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = {
+        AppTopBar(title = "", onBack = onBack, actions = { IconButton(onClick = { viewModel.save(accountId, fName, groupId, fIncludeNet, fHidden, fAutoHide, fNote, fExtra, fInitial) { onBack() } }) { Icon(Icons.Filled.Check, contentDescription = "保存") } })
+    }) { pad ->
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(pad).padding(horizontal = AppSpacing.xl)) {
             Text("编辑账户", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(AppSpacing.xxl))
             Text("基本信息", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.height(10.dp))
             OutlinedTextField(value = fName, onValueChange = { fName = it }, label = { Text("账户名称") }, singleLine = true, modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(14.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.md)) {
                 Text("账户类型", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                 Text("${typeLabel(acc.type)} ›", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.md)) {
                 Text("账户币种", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                 Text("人民币 ›", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { balanceDialog = true }.padding(vertical = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { balanceDialog = true }.padding(vertical = AppSpacing.md)) {
                 Text("账户余额", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                 Text("$fInitial ›", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             Text("账户设置", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(AppSpacing.xs))
             Box {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { groupMenu = true }.padding(vertical = 12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { groupMenu = true }.padding(vertical = AppSpacing.md)) {
                     Text("所属分组", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                     Text("${groups.firstOrNull { it.id == groupId }?.name ?: "未分组"} ›", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -305,41 +304,37 @@ fun EditAccountScreen(viewModel: EditAccountViewModel = hiltViewModel(), account
                     groups.forEach { g -> DropdownMenuItem(text = { Text(g.name) }, onClick = { groupId = g.id; groupMenu = false }) }
                 }
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { pickLedgers = true }.padding(vertical = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { pickLedgers = true }.padding(vertical = AppSpacing.md)) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text("适用账本", style = MaterialTheme.typography.bodyLarge)
                     Text("设置此账户可在哪些账本中使用", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Text("${if (selLedgers.size == ledgers.size) "全部" else "${selLedgers.size}个账本"} ›", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)) {
                 Text("计入净资产", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                 Switch(checked = fIncludeNet, onCheckedChange = { fIncludeNet = it })
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)) {
                 Text("隐藏账户", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                 Switch(checked = fHidden, onCheckedChange = { fHidden = it })
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)) {
                 Checkbox(checked = fAutoHide, onCheckedChange = { fAutoHide = it })
                 Text("余额为0时自动隐藏，非0时自动显示", style = MaterialTheme.typography.bodyMedium)
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             Text("扩展信息（选填）", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             OutlinedTextField(value = fNote, onValueChange = { fNote = it }, label = { Text("备注") }, modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(AppSpacing.md))
             OutlinedTextField(value = fExtra, onValueChange = { fExtra = it }, label = { Text("其他信息") }, modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(28.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(24.dp)).background(MaterialTheme.colorScheme.surfaceVariant).clickable { deleteConfirm = true }.padding(vertical = 14.dp), contentAlignment = Alignment.Center) {
-                    Text("删除", color = SemanticColors.ExpenseRed, fontWeight = FontWeight.SemiBold)
-                }
-                Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(24.dp)).background(MaterialTheme.colorScheme.primary).clickable { viewModel.save(accountId, fName, groupId, fIncludeNet, fHidden, fAutoHide, fNote, fExtra, fInitial) { onBack() } }.padding(vertical = 14.dp), contentAlignment = Alignment.Center) {
-                    Text("保存", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.SemiBold)
-                }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
+                AppButton(text = "删除", onClick = { deleteConfirm = true }, variant = AppButtonVariant.Outlined, modifier = Modifier.weight(1f))
+                AppButton(text = "保存", onClick = { viewModel.save(accountId, fName, groupId, fIncludeNet, fHidden, fAutoHide, fNote, fExtra, fInitial) { onBack() } }, variant = AppButtonVariant.Primary, modifier = Modifier.weight(1f))
             }
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(AppSpacing.xxl))
         }
     }
     if (balanceDialog) {

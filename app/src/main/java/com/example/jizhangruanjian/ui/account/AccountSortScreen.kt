@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,10 +23,12 @@ import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,6 +52,9 @@ import com.example.jizhangruanjian.core.util.Formatters
 import com.example.jizhangruanjian.data.model.HomeConfig
 import com.example.jizhangruanjian.domain.model.AccountDomain
 import com.example.jizhangruanjian.domain.model.AccountGroupDomain
+import com.example.jizhangruanjian.ui.components.AppTopBar
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyColumnState
 fun isCreditGroup(g: AccountGroupDomain): Boolean = g.name.contains("信用")
@@ -84,6 +88,7 @@ private fun sortModeLabel(mode: String?): String = when (mode) {
     else -> "按添加顺序"
 }
 private val SORT_MODES = listOf("custom", "balance_desc", "balance_asc")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountSortScreen(onBack: () -> Unit, viewModel: AccountTabViewModel = hiltViewModel()) {
     val groups by viewModel.groups.collectAsState()
@@ -95,13 +100,11 @@ fun AccountSortScreen(onBack: () -> Unit, viewModel: AccountTabViewModel = hiltV
     when (page) {
         "groups" -> GroupOrderPage(groups, config, viewModel, onBack = { page = "main" })
         "accounts" -> AccountOrderPage(accounts, groups, config, viewModel, onBack = { page = "main" })
-        else -> Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
-                Text("排序管理", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(24.dp))
+        else -> Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "排序管理", onBack = onBack) }) { pad ->
+            Column(modifier = Modifier.padding(pad).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = AppSpacing.xl)) {
+                Spacer(Modifier.height(AppSpacing.xxl))
                 Text("账户类型", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(AppSpacing.xs))
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { page = "groups" }.padding(vertical = 14.dp)) {
                     Text("自定义类型顺序", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                     Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -143,7 +146,7 @@ fun AccountSortScreen(onBack: () -> Unit, viewModel: AccountTabViewModel = hiltV
                         modeDialog = false
                     }) {
                         RadioButton(selected = config.accountSortMode == m, onClick = null)
-                        Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(AppSpacing.sm))
                         Text(sortModeLabel(m))
                     }
                 }
@@ -151,6 +154,7 @@ fun AccountSortScreen(onBack: () -> Unit, viewModel: AccountTabViewModel = hiltV
         }, confirmButton = { TextButton(onClick = { modeDialog = false }) { Text("取消") } })
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GroupOrderPage(groups: List<AccountGroupDomain>, config: HomeConfig, viewModel: AccountTabViewModel, onBack: () -> Unit) {
     val ordered = orderGroups(groups, config)
@@ -163,20 +167,19 @@ private fun GroupOrderPage(groups: List<AccountGroupDomain>, config: HomeConfig,
             c.copy(groupOrder = base.joinToString(","))
         }
     }
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
-        IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-            Text("自定义类型顺序", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(8.dp))
-            Text("长按拖动调整账户类型（分组）的显示顺序", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(12.dp))
-            LazyColumn(state = listState, modifier = Modifier.fillMaxSize(), verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp)) {
-                items(ids, key = { it }) { id ->
-                    val g = ordered.firstOrNull { it.id == id } ?: return@items
-                    ReorderableItem(reorderState, key = id) { dragging ->
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (dragging) 1f else 0.6f)).padding(horizontal = 16.dp).zIndex(if (dragging) 1f else 0f).longPressDraggableHandle()) {
-                            Text(g.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                            Icon(Icons.Filled.Menu, contentDescription = "拖动", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(20.dp))
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "自定义类型顺序", onBack = onBack) }) { pad ->
+        Column(modifier = Modifier.padding(pad).fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize().padding(horizontal = AppSpacing.xl)) {
+                Text("长按拖动调整账户类型（分组）的显示顺序", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(AppSpacing.md))
+                LazyColumn(state = listState, modifier = Modifier.fillMaxSize(), verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp)) {
+                    items(ids, key = { it }) { id ->
+                        val g = ordered.firstOrNull { it.id == id } ?: return@items
+                        ReorderableItem(reorderState, key = id) { dragging ->
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(AppSize.buttonHeight).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (dragging) 1f else 0.6f)).padding(horizontal = AppSpacing.lg).zIndex(if (dragging) 1f else 0f).longPressDraggableHandle()) {
+                                Text(g.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                                Icon(Icons.Filled.Menu, contentDescription = "拖动", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(AppSize.iconSize))
+                            }
                         }
                     }
                 }
@@ -184,6 +187,7 @@ private fun GroupOrderPage(groups: List<AccountGroupDomain>, config: HomeConfig,
         }
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AccountOrderPage(accounts: List<AccountDomain>, groups: List<AccountGroupDomain>, config: HomeConfig, viewModel: AccountTabViewModel, onBack: () -> Unit) {
     val orderedGroups = orderGroups(groups, config)
@@ -229,38 +233,34 @@ private fun AccountOrderPage(accounts: List<AccountDomain>, groups: List<Account
             c.copy(accountOrder = newIds.joinToString(","))
         }
     }
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Text("账户排序", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        }
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp), verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "账户排序", onBack = onBack) }) { pad ->
+        LazyColumn(state = listState, modifier = Modifier.padding(pad).fillMaxSize().padding(horizontal = AppSpacing.md), verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(AppSpacing.sm)) {
             items(rows.size, key = { keyFor(rows[it]) }) { i ->
                 val (g, a) = rows[i]
                 if (a == null) {
                     ReorderableItem(reorderState, key = "g_${g.id}") {
-                        Text(g.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)).padding(horizontal = 16.dp, vertical = 14.dp))
+                        Text(g.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)).padding(horizontal = AppSpacing.lg, vertical = 14.dp))
                     }
                 } else {
                     ReorderableItem(reorderState, key = "a_${a.id}") { dragging ->
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surface.copy(alpha = if (dragging) 1f else 0.8f)).padding(horizontal = 12.dp, vertical = 10.dp).zIndex(if (dragging) 1f else 0f)) {
-                            Box(modifier = Modifier.size(34.dp).clip(RoundedCornerShape(8.dp)).background(Color(a.color).copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surface.copy(alpha = if (dragging) 1f else 0.8f)).padding(horizontal = AppSpacing.md, vertical = 10.dp).zIndex(if (dragging) 1f else 0f)) {
+                            Box(modifier = Modifier.size(34.dp).clip(MaterialTheme.shapes.small).background(Color(a.color).copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
                                 Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, tint = Color(a.color), modifier = Modifier.size(18.dp))
                             }
-                            Spacer(Modifier.width(12.dp))
+                            Spacer(Modifier.width(AppSpacing.md))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(a.name, style = MaterialTheme.typography.bodyLarge)
                                 if (a.note.isNotBlank()) Text(a.note, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                             }
                             Text(Formatters.yuanText(a.balance), style = MaterialTheme.typography.bodyLarge, color = if (a.balance < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
-                            Spacer(Modifier.width(12.dp))
+                            Spacer(Modifier.width(AppSpacing.md))
                             Icon(Icons.Filled.Menu, contentDescription = "拖动排序", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.longPressDraggableHandle())
                         }
                     }
                 }
             }
             item {
-                Text("按住右侧的\"=\"上下拖动排序", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp))
+                Text("按住右侧的\"=\"上下拖动排序", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.xl))
             }
         }
     }

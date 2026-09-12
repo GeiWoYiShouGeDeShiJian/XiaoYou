@@ -8,18 +8,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -28,8 +27,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,7 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -70,7 +67,13 @@ import com.example.jizhangruanjian.data.model.Tag
 import com.example.jizhangruanjian.data.model.TransactionType
 import com.example.jizhangruanjian.domain.model.AccountDomain
 import com.example.jizhangruanjian.domain.model.CategoryDomain
+import com.example.jizhangruanjian.ui.components.AppButton
+import com.example.jizhangruanjian.ui.components.AppButtonVariant
+import com.example.jizhangruanjian.ui.components.AppTextField
+import com.example.jizhangruanjian.ui.components.AppTopBar
 import com.example.jizhangruanjian.ui.components.CategoryIcon
+import com.example.jizhangruanjian.ui.components.AppCard
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -96,9 +99,9 @@ fun TemplateSheet(templates: List<RecordTemplate>, iconOf: (Long) -> String, cat
     var pendingDelete by remember { mutableStateOf<RecordTemplate?>(null) }
     ModalBottomSheet(onDismissRequest = onClose, sheetState = sheetState, dragHandle = null) {
         Column(Modifier.fillMaxWidth().fillMaxHeight()) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.sm)) {
                 IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(AppSpacing.sm))
                 Text("模板", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = onAddNew) { Icon(Icons.Filled.AddCircle, contentDescription = "新增模板") }
@@ -108,22 +111,22 @@ fun TemplateSheet(templates: List<RecordTemplate>, iconOf: (Long) -> String, cat
                     Text("日常交易可以通过模板来快捷记账哦", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                 }
             } else {
-                LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                     item { Spacer(Modifier.height(6.dp)) }
                     items(templates, key = { it.id }) { tpl ->
-                        Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().combinedClickable(onClick = { onApply(tpl) }, onLongClick = { pendingDelete = tpl }).padding(horizontal = 12.dp, vertical = 10.dp)) {
+                        AppCard(shape = MaterialTheme.shapes.large, containerColor = MaterialTheme.colorScheme.surfaceContainerLow, contentPadding = PaddingValues(horizontal = AppSpacing.md, vertical = 10.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.md)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().combinedClickable(onClick = { onApply(tpl) }, onLongClick = { pendingDelete = tpl })) {
                                 CategoryIcon(iconOf(tpl.categoryId), size = 36.dp, fontSize = 20.sp)
-                                Spacer(Modifier.width(12.dp))
+                                Spacer(Modifier.width(AppSpacing.md))
                                 Column(Modifier.weight(1f)) {
                                     Text(tpl.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, maxLines = 1)
                                     Text(listOf(typeTextOf(tpl.type), catNameOf(tpl.categoryId), accNameOf(tpl.accountId)).filter { it.isNotBlank() }.joinToString(" · "), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                                 }
-                                Text("编辑", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.clickable { onEdit(tpl) }.padding(horizontal = 8.dp, vertical = 8.dp))
+                                Text("编辑", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.clickable { onEdit(tpl) }.padding(horizontal = AppSpacing.sm, vertical = AppSpacing.sm))
                             }
                         }
                     }
-                    item { Spacer(Modifier.height(20.dp)) }
+                    item { Spacer(Modifier.height(AppSpacing.xl)) }
                 }
             }
         }
@@ -135,6 +138,7 @@ fun TemplateSheet(templates: List<RecordTemplate>, iconOf: (Long) -> String, cat
     }
 }
 // 添加/编辑模板页：快照当前草稿，逐项修改后保存
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplateEditScreen(initial: RecordTemplate, categories: List<CategoryDomain>, accounts: List<AccountDomain>, members: List<Member>, tags: List<Tag>, merchants: List<Merchant>, onSave: (RecordTemplate) -> Unit, onDelete: (RecordTemplate) -> Unit, onBack: () -> Unit) {
     var tpl by remember { mutableStateOf(initial) }
@@ -153,13 +157,13 @@ fun TemplateEditScreen(initial: RecordTemplate, categories: List<CategoryDomain>
     val isLoan = type == TransactionType.LOAN
     val amountCentsNow = KeypadCalculator.toCents(amountText) ?: 0L
     val discountCentsNow = KeypadCalculator.toCents(discountText) ?: 0L
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding().imePadding()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Text(if (initial.id == 0L) "添加模板" else "编辑模板", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = {
+        AppTopBar(title = "", onBack = onBack, actions = {
             IconButton(onClick = { onSave(tpl.copy(type = typeEnum.name, amountCents = amountCentsNow, discountCents = if (typeEnum == TransactionType.EXPENSE) discountCentsNow else 0L)) }) { Icon(Icons.Filled.Check, contentDescription = "保存") }
-        }
-        Row(Modifier.fillMaxWidth()) {
+        })
+    }) { pad ->
+        Column(Modifier.padding(pad).fillMaxSize().imePadding()) {
+            Row(Modifier.fillMaxWidth()) {
             templateTypes.forEach { (k, label) ->
                 val sel = type.name == k
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f).clickable {
@@ -174,7 +178,7 @@ fun TemplateEditScreen(initial: RecordTemplate, categories: List<CategoryDomain>
             }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            OutlinedTextField(value = tpl.name, onValueChange = { tpl = tpl.copy(name = it) }, label = { Text("模板名称") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
+            AppTextField(value = tpl.name, onValueChange = { tpl = tpl.copy(name = it) }, label = "模板名称", singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm))
             if (isTransfer) {
                 FormRow("类别", "账户互转", enabled = false, onClick = {})
                 TransferAccountRow(accName.ifBlank { "未选择" }, toAccName.ifBlank { "未选择" }, { dialog = "account" }, { dialog = "toaccount" })
@@ -206,11 +210,12 @@ fun TemplateEditScreen(initial: RecordTemplate, categories: List<CategoryDomain>
             }
             SwitchRow("快速保存", "已设置金额的模板，使用时可直接保存", tpl.quickSave) { tpl = tpl.copy(quickSave = it) }
             if (initial.id != 0L) {
-                Text("删除模板", color = SemanticColors.ExpenseRed, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().clickable { onDelete(tpl) }.padding(vertical = 16.dp))
+                Text("删除模板", color = SemanticColors.ExpenseRed, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().clickable { onDelete(tpl) }.padding(vertical = AppSpacing.lg))
             }
-            Spacer(Modifier.height(8.dp))
-            Button(onClick = { onSave(tpl.copy(type = type.name, amountCents = amountCentsNow, discountCents = if (type == TransactionType.EXPENSE) discountCentsNow else 0L)) }, shape = RoundedCornerShape(24.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary), modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) { Text("保存") }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
+            AppButton(text = "保存", onClick = { onSave(tpl.copy(type = type.name, amountCents = amountCentsNow, discountCents = if (type == TransactionType.EXPENSE) discountCentsNow else 0L)) }, variant = AppButtonVariant.Primary, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg))
+            Spacer(Modifier.height(AppSpacing.lg))
+        }
         }
     }
     when (dialog) {
@@ -234,14 +239,14 @@ fun TemplateEditScreen(initial: RecordTemplate, categories: List<CategoryDomain>
         "account" -> PickerDialog(title = if (isTransfer) "选择转出账户" else if (isLoan) "选择账户" else "选择账户", onClose = { dialog = "" }) {
             LazyColumn(Modifier.height(380.dp)) {
                 items(accounts.filter { !it.hidden }, key = { it.id }) { a ->
-                    Text(a.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clickable { tpl = tpl.copy(accountId = a.id); dialog = "" }.padding(vertical = 12.dp))
+                    Text(a.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clickable { tpl = tpl.copy(accountId = a.id); dialog = "" }.padding(vertical = AppSpacing.md))
                 }
             }
         }
         "toaccount" -> PickerDialog(title = if (isLoan) "选择对方账户" else "选择到账账户", onClose = { dialog = "" }) {
             LazyColumn(Modifier.height(380.dp)) {
                 items(accounts.filter { !it.hidden }, key = { "t_${it.id}" }) { a ->
-                    Text(a.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clickable { tpl = tpl.copy(toAccountId = a.id); dialog = "" }.padding(vertical = 12.dp))
+                    Text(a.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clickable { tpl = tpl.copy(toAccountId = a.id); dialog = "" }.padding(vertical = AppSpacing.md))
                 }
             }
         }
@@ -263,9 +268,9 @@ fun TemplateEditScreen(initial: RecordTemplate, categories: List<CategoryDomain>
         "member" -> CheckPickerDialog(title = "选择角色", options = members.map { Triple(it.id, it.name, it.id in memberList) }, onToggle = { id, checked -> tpl = tpl.copy(memberIds = (if (checked) memberList + id else memberList - id).joinToString(",")) }, onDone = { dialog = "" })
         "merchant" -> PickerDialog(title = "选择商家", onClose = { dialog = "" }) {
             LazyColumn(Modifier.height(380.dp)) {
-                item { Text("无商家", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth().clickable { tpl = tpl.copy(merchant = ""); dialog = "" }.padding(vertical = 12.dp)) }
+                item { Text("无商家", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth().clickable { tpl = tpl.copy(merchant = ""); dialog = "" }.padding(vertical = AppSpacing.md)) }
                 items(merchants, key = { it.id }) { m ->
-                    Text(m.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clickable { tpl = tpl.copy(merchant = m.name); dialog = "" }.padding(vertical = 12.dp))
+                    Text(m.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clickable { tpl = tpl.copy(merchant = m.name); dialog = "" }.padding(vertical = AppSpacing.md))
                 }
             }
         }
@@ -274,15 +279,15 @@ fun TemplateEditScreen(initial: RecordTemplate, categories: List<CategoryDomain>
 // 转账/借贷：左右两端账户 + 中间箭头
 @Composable
 private fun TransferAccountRow(leftName: String, rightName: String, onLeft: () -> Unit, onRight: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xl, vertical = AppSpacing.lg)) {
         Text(leftName, style = MaterialTheme.typography.bodyMedium, color = if (leftName == "未选择") MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f).clickable { onLeft() })
-        Text("→", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp))
+        Text("→", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = AppSpacing.md))
         Text(rightName, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.End, color = if (rightName == "未选择") MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f).clickable { onRight() })
     }
 }
 @Composable
 private fun FormRow(label: String, value: String, muted: Boolean = false, enabled: Boolean = true, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(enabled = enabled) { onClick() }.padding(horizontal = 20.dp, vertical = 16.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(enabled = enabled) { onClick() }.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.lg)) {
         Text(label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
         Text(value, style = MaterialTheme.typography.bodyMedium, color = if (muted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface)
         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -290,12 +295,12 @@ private fun FormRow(label: String, value: String, muted: Boolean = false, enable
 }
 @Composable
 private fun SwitchRow(title: String, sub: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onChange(!checked) }.padding(horizontal = 20.dp, vertical = 8.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onChange(!checked) }.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm)) {
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
             if (sub.isNotBlank()) Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(AppSpacing.md))
         Switch(checked = checked, onCheckedChange = { onChange(it) })
     }
 }

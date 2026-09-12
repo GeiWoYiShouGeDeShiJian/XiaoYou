@@ -29,8 +29,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,7 +42,6 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,6 +58,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.jizhangruanjian.data.model.Member
+import com.example.jizhangruanjian.ui.components.AppButton
+import com.example.jizhangruanjian.ui.components.AppButtonVariant
+import com.example.jizhangruanjian.ui.components.AppTextField
+import com.example.jizhangruanjian.ui.components.AppTopBar
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 // 角色头像预设：emoji + 背景色
 val roleAvatarPresets: List<Pair<String, Long>> = listOf(
     "🧑" to 0xFFE8C9A0, "🧒" to 0xFFF2C14E, "👶" to 0xFFF2A0A0, "👴" to 0xFFB8860B,
@@ -72,16 +75,16 @@ private val defaultRoleIcon = "🧑" to 0xFFE8C9A0
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RoleMemberRow(name: String, icon: String, color: Long, isDefault: Boolean, checked: Boolean? = null, isSelected: Boolean = false, onClick: () -> Unit, onLongClick: (() -> Unit)? = null) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick).padding(horizontal = 16.dp, vertical = 8.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick).padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm)) {
         if (checked != null) {
             Checkbox(checked = checked, onCheckedChange = { onClick() })
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(AppSpacing.xs))
         }
         Box(Modifier.size(40.dp).clip(CircleShape).background(Color(color)), contentAlignment = Alignment.Center) { Text(icon, style = MaterialTheme.typography.titleMedium) }
-        Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(AppSpacing.lg))
         Text(name, style = MaterialTheme.typography.bodyLarge)
         if (isDefault) {
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(AppSpacing.sm))
             Box(Modifier.clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.secondaryContainer).padding(horizontal = 6.dp, vertical = 2.dp)) {
                 Text("默认", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
             }
@@ -110,9 +113,9 @@ fun RolePickerScreen(members: List<Member>, selectedId: Long?, selectedMembers: 
         Column(Modifier.fillMaxWidth().fillMaxHeight()) {
             Box(Modifier.fillMaxWidth()) {
                 if (!showSearch) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.sm)) {
                         IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-                        Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(AppSpacing.sm))
                         Text("角色", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.weight(1f))
                         IconButton(onClick = { showSearch = true }) { Icon(Icons.Filled.Search, contentDescription = "搜索") }
@@ -121,13 +124,13 @@ fun RolePickerScreen(members: List<Member>, selectedId: Long?, selectedMembers: 
                     }
                 } else {
                     // 搜索栏：点击搜索图标后直接切换（返回箭头直接关闭角色界面）
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.sm)) {
                         IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-                        Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
-                        Spacer(Modifier.width(8.dp))
+                        Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(AppSize.iconSize))
+                        Spacer(Modifier.width(AppSpacing.sm))
                         Column(Modifier.weight(1f)) {
                             BasicTextField(value = query, onValueChange = { query = it }, singleLine = true, textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface), modifier = Modifier.fillMaxWidth().focusRequester(searchFocus))
-                            Spacer(Modifier.height(4.dp))
+                            Spacer(Modifier.height(AppSpacing.xs))
                             Box(Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.outlineVariant))
                         }
                         IconButton(onClick = { if (query.isNotEmpty()) query = "" else { showSearch = false; query = "" } }) { Icon(Icons.Filled.Close, contentDescription = "清除", modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
@@ -141,9 +144,9 @@ fun RolePickerScreen(members: List<Member>, selectedId: Long?, selectedMembers: 
                 }
             }
             if (multi) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant).combinedClickable(onClick = { multiSel = if (allSelected) emptySet() else setOf(-1L) + filtered.map { it.id }; pushSel() }, onLongClick = null).padding(horizontal = 16.dp, vertical = 10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant).combinedClickable(onClick = { multiSel = if (allSelected) emptySet() else setOf(-1L) + filtered.map { it.id }; pushSel() }, onLongClick = null).padding(horizontal = AppSpacing.lg, vertical = 10.dp)) {
                     Checkbox(checked = allSelected, onCheckedChange = { multiSel = if (it) setOf(-1L) + filtered.map { m -> m.id } else emptySet(); pushSel() })
-                    Spacer(Modifier.width(4.dp))
+                    Spacer(Modifier.width(AppSpacing.xs))
                     Text("全选", style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.weight(1f))
                     Text("已选 ${multiSel.size}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -165,9 +168,9 @@ fun RolePickerScreen(members: List<Member>, selectedId: Long?, selectedMembers: 
                     })
                 }
                 item {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().combinedClickable(onClick = onAddNew, onLongClick = null).padding(horizontal = 16.dp, vertical = 12.dp)) {
-                        Icon(Icons.Filled.AddCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
-                        Spacer(Modifier.width(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().combinedClickable(onClick = onAddNew, onLongClick = null).padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)) {
+                        Icon(Icons.Filled.AddCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(AppSize.iconXLarge))
+                        Spacer(Modifier.width(AppSpacing.md))
                         Text("新增角色", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
@@ -191,30 +194,30 @@ fun RoleEditScreen(initial: Member?, onSave: (Member) -> Unit, onClose: () -> Un
         Unit
     }
     Scaffold(topBar = {
-        TopAppBar(title = {}, navigationIcon = { IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") } }, actions = {
+        AppTopBar(title = "", onBack = onClose, actions = {
             IconButton(onClick = save) { Icon(Icons.Filled.Check, contentDescription = "保存") }
         })
     }) { pad ->
-        Column(Modifier.padding(pad).fillMaxSize().padding(horizontal = 20.dp)) {
+        Column(Modifier.padding(pad).fillMaxSize().padding(horizontal = AppSpacing.xl)) {
             Text(if (initial == null) "新增角色" else "编辑角色", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(AppSpacing.xxl))
             Box(Modifier.align(Alignment.CenterHorizontally).combinedClickable(onClick = { showAvatars = !showAvatars }, onLongClick = null)) {
                 Box(Modifier.size(96.dp).clip(CircleShape).background(Color(color)), contentAlignment = Alignment.Center) { Text(icon, style = MaterialTheme.typography.displaySmall) }
                 Box(Modifier.align(Alignment.BottomEnd).size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.Settings, contentDescription = "选择头像", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(4.dp))
+                    Icon(Icons.Filled.Settings, contentDescription = "选择头像", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(AppSpacing.xs))
                 }
             }
             if (showAvatars) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md), verticalArrangement = Arrangement.spacedBy(AppSpacing.md), modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.lg)) {
                     roleAvatarPresets.forEach { (ic, cl) ->
                         Box(Modifier.size(48.dp).clip(CircleShape).background(Color(cl)).border(width = if (ic == icon && cl == color) 3.dp else 0.dp, color = MaterialTheme.colorScheme.primary, shape = CircleShape).combinedClickable(onClick = { icon = ic; color = cl }, onLongClick = null), contentAlignment = Alignment.Center) { Text(ic, style = MaterialTheme.typography.titleLarge) }
                     }
                 }
             }
-            Spacer(Modifier.height(16.dp))
-            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("角色名称") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(24.dp))
-            Button(onClick = save, shape = RoundedCornerShape(24.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary), modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("保存", style = MaterialTheme.typography.titleMedium) }
+            Spacer(Modifier.height(AppSpacing.lg))
+            AppTextField(value = name, onValueChange = { name = it }, label = "角色名称", singleLine = true, modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(AppSpacing.xxl))
+            AppButton(text = "保存", onClick = save, variant = AppButtonVariant.Primary, modifier = Modifier.fillMaxWidth())
         }
     }
 }
@@ -227,13 +230,13 @@ fun RoleManageScreen(members: List<Member>, onBack: () -> Unit, onAddNew: () -> 
     var deleteFor by remember { mutableStateOf<Member?>(null) }
     val filtered = if (query.isBlank()) members else members.filter { it.name.contains(query.trim()) }
     Scaffold(topBar = {
-        TopAppBar(title = { Text("角色管理") }, navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") } }, actions = {
+        AppTopBar(title = "角色管理", onBack = onBack, actions = {
             IconButton(onClick = { showSearch = !showSearch; if (!showSearch) query = "" }) { Icon(Icons.Filled.Search, contentDescription = "搜索") }
         })
     }) { pad ->
         Column(Modifier.padding(pad).fillMaxSize()) {
             if (showSearch) {
-                OutlinedTextField(value = query, onValueChange = { query = it }, placeholder = { Text("搜索角色") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
+                AppTextField(value = query, onValueChange = { query = it }, placeholder = "搜索角色", singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm))
             }
             LazyColumn(Modifier.fillMaxSize()) {
                 item {
@@ -243,9 +246,9 @@ fun RoleManageScreen(members: List<Member>, onBack: () -> Unit, onAddNew: () -> 
                     RoleMemberRow(name = m.name, icon = m.icon, color = m.color, isDefault = false, onClick = { onEdit(m) }, onLongClick = { deleteFor = m })
                 }
                 item {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().combinedClickable(onClick = onAddNew, onLongClick = null).padding(horizontal = 16.dp, vertical = 12.dp)) {
-                        Icon(Icons.Filled.AddCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
-                        Spacer(Modifier.width(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().combinedClickable(onClick = onAddNew, onLongClick = null).padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)) {
+                        Icon(Icons.Filled.AddCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(AppSize.iconXLarge))
+                        Spacer(Modifier.width(AppSpacing.md))
                         Text("新增角色", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyLarge)
                     }
                 }

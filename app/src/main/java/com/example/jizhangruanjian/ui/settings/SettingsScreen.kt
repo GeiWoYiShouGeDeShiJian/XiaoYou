@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +21,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -31,12 +34,13 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -61,17 +65,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.jizhangruanjian.core.security.AppLockManager
 import com.example.jizhangruanjian.core.parser.OfficialBillParser
 import com.example.jizhangruanjian.data.ThemeStore
-import com.example.jizhangruanjian.ui.components.CollapsingTitleScaffold
+import com.example.jizhangruanjian.ui.components.AppButton
+import com.example.jizhangruanjian.ui.components.AppCard
+import com.example.jizhangruanjian.ui.components.AppTopBar
 import com.example.jizhangruanjian.ui.record.NoteSettingsScreen
 import com.example.jizhangruanjian.ui.record.RecordPreferenceScreen
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import com.example.jizhangruanjian.ui.theme.ThemeColor
 // P13 设置中心：分类入口 hub + 二级面板
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(onBack: () -> Unit, onCustomizeHome: () -> Unit = {}, onOpenLedgerManage: () -> Unit = {}, viewModel: SettingsViewModel = hiltViewModel()) {
     var panel by remember { mutableStateOf<String?>(null) }
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        CollapsingTitleScaffold(title = "设置", onBack = onBack) {
-            Column(Modifier.padding(horizontal = 16.dp)) {
+        Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "设置", onBack = onBack) }) { pad ->
+            Column(Modifier.padding(pad).padding(horizontal = AppSpacing.lg).verticalScroll(rememberScrollState())) {
                 SettingsCard(Icons.AutoMirrored.Filled.MenuBook, "账本管理", "收支类别、标签等数据管理") { onOpenLedgerManage() }
                 SettingsCard(Icons.Filled.Palette, "主题与显示", "界面外观、功能显示等选项") { panel = "theme" }
                 SettingsCard(Icons.Filled.Edit, "记账设置", "记账选项、报销、币种") { panel = "record" }
@@ -79,7 +88,7 @@ fun SettingsScreen(onBack: () -> Unit, onCustomizeHome: () -> Unit = {}, onOpenL
                 SettingsCard(Icons.Filled.Notifications, "通知与提醒", "记账提醒、还款提醒") { panel = "notify" }
                 SettingsCard(Icons.Filled.Lock, "应用锁", "指纹解锁、手势解锁") { panel = "lock" }
                 SettingsCard(Icons.Filled.Widgets, "扩展功能", "桌面小组件、URL Scheme") { panel = "extend" }
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(AppSpacing.lg))
             }
         }
         when (panel) {
@@ -99,32 +108,45 @@ fun SettingsScreen(onBack: () -> Unit, onCustomizeHome: () -> Unit = {}, onOpenL
 }
 @Composable
 private fun SettingsCard(icon: ImageVector, title: String, subtitle: String, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 15.dp)) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.width(16.dp))
-        Column {
-            Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    AppCard(onClick = onClick, shape = RoundedCornerShape(14.dp), containerColor = MaterialTheme.colorScheme.surfaceContainerLow, contentPadding = PaddingValues(horizontal = AppSpacing.lg, vertical = 15.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, contentDescription = null, modifier = Modifier.size(AppSize.iconLarge), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.width(AppSpacing.lg))
+                Column {
+                    Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
-    }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PanelScaffold(title: String, onBack: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    CollapsingTitleScaffold(title = title, onBack = onBack) {
-        Column(Modifier.padding(horizontal = 16.dp)) { content() }
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = title, onBack = onBack) }) { pad ->
+        Column(Modifier.padding(pad).padding(horizontal = AppSpacing.lg).verticalScroll(rememberScrollState())) { content() }
     }
 }
 @Composable
 private fun PanelRow(title: String, subtitle: String? = null, value: String? = null, onClick: (() -> Unit)? = null, trailing: @Composable (() -> Unit)? = null) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier).padding(horizontal = 16.dp, vertical = if (subtitle != null) 13.dp else 15.dp)) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-            if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    val card: @Composable ColumnScope.() -> Unit = {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (value != null) Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (trailing != null) trailing() else if (onClick != null) Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.padding(start = 6.dp).size(15.dp).rotate(180f), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        if (value != null) Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        if (trailing != null) trailing() else if (onClick != null) Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.padding(start = 6.dp).size(15.dp).rotate(180f), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    val containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+    val contentPadding = PaddingValues(horizontal = AppSpacing.lg, vertical = if (subtitle != null) 13.dp else 15.dp)
+    if (onClick != null) {
+        AppCard(onClick = onClick, shape = MaterialTheme.shapes.medium, containerColor = containerColor, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) { card() }
+    } else {
+        AppCard(shape = MaterialTheme.shapes.medium, containerColor = containerColor, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) { card() }
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ThemePanel(onBack: () -> Unit, onCustomizeHome: () -> Unit, viewModel: SettingsViewModel) {
     val themeMode by viewModel.themeMode.collectAsState()
@@ -132,7 +154,7 @@ private fun ThemePanel(onBack: () -> Unit, onCustomizeHome: () -> Unit, viewMode
     val themeColor by viewModel.themeColor.collectAsState()
     PanelScaffold(title = "主题与显示", onBack = onBack) {
         Text("界面外观", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(AppSpacing.sm))
         PanelRow(title = "深色模式", trailing = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 FilterChip(selected = themeMode == ThemeStore.Mode.SYSTEM, onClick = { viewModel.setThemeMode(ThemeStore.Mode.SYSTEM) }, label = { Text("系统") })
@@ -145,16 +167,16 @@ private fun ThemePanel(onBack: () -> Unit, onCustomizeHome: () -> Unit, viewMode
         PanelRow(title = "主题色", subtitle = "暖橘 / 清爽蓝 / 薄荷绿", trailing = {
             Row {
                 ThemeColor.entries.forEach { c ->
-                    Box(modifier = Modifier.padding(start = 8.dp).size(30.dp).clip(CircleShape).background(Color(c.preview)).border(if (themeColor == c) 3.dp else 0.dp, MaterialTheme.colorScheme.onSurface, CircleShape).clickable { viewModel.setThemeColor(c) }, contentAlignment = Alignment.Center) {
-                        if (themeColor == c) Icon(Icons.Filled.Check, contentDescription = c.key, tint = Color.White, modifier = Modifier.size(16.dp))
-                    }
+                    Box(modifier = Modifier.padding(start = AppSpacing.sm).size(30.dp).clip(CircleShape).background(Color(c.preview)).border(if (themeColor == c) 3.dp else 0.dp, MaterialTheme.colorScheme.onSurface, CircleShape).clickable { viewModel.setThemeColor(c) }, contentAlignment = Alignment.Center) {
+                    if (themeColor == c) Icon(Icons.Filled.Check, contentDescription = c.key, tint = Color.White, modifier = Modifier.size(AppSize.iconSmall))
+                }
                 }
             }
         })
         PanelRow(title = "动态色彩", subtitle = "Android 12+ 根据壁纸取色", trailing = { Switch(checked = dynamicColor, onCheckedChange = viewModel::setDynamicColor) })
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(AppSpacing.lg))
         Text("功能显示", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(AppSpacing.sm))
         PanelRow(title = "自定义首页", subtitle = "配置首页数据概览、模块显隐与排序", onClick = onCustomizeHome)
     }
 }
@@ -178,7 +200,7 @@ private fun ReportPanel(onBack: () -> Unit, viewModel: SettingsViewModel) {
             AlertDialog(onDismissRequest = { showStartDialog = false }, confirmButton = {}, dismissButton = { TextButton(onClick = { showStartDialog = false }) { Text("取消") } }, title = { Text("每月起始日") }, text = {
                 Column {
                     listOf(1, 5, 10, 15, 20, 25, 28).forEach { d ->
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable { viewModel.setMonthStart(d); showStartDialog = false }.padding(vertical = 12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable { viewModel.setMonthStart(d); showStartDialog = false }.padding(vertical = AppSpacing.md)) {
                             Text("${d}日", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                             if (monthStart == d) Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         }
@@ -231,14 +253,14 @@ private fun ExtendPanel(onBack: () -> Unit, viewModel: SettingsViewModel) {
     PanelScaffold(title = "扩展功能", onBack = onBack) {
         PanelRow(title = "桌面小组件", subtitle = "总览与快速记账两枚小组件（已内置）")
         PanelRow(title = "URL Scheme", subtitle = "外部唤起快速记账（开发中）")
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(AppSpacing.lg))
         Text("账单导入 / 导出", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(AppSpacing.sm))
         PanelRow(title = "存储路径", subtitle = "备份/模板/导出均保存到该目录", value = if (storePath.contains("/")) storePath else "Download/$storePath", onClick = { showPathDialog = true })
-        Spacer(Modifier.height(12.dp))
-        Button(onClick = { viewModel.exportCsvToLocal() }) { Text("导出 CSV") }
+        Spacer(Modifier.height(AppSpacing.md))
+        AppButton(text = "导出 CSV", onClick = { viewModel.exportCsvToLocal() })
         Spacer(Modifier.height(10.dp))
-        Button(onClick = { importLauncher.launch(arrayOf("text/*", "application/octet-stream")) }) { Text("导入 CSV") }
+        AppButton(text = "导入 CSV", onClick = { importLauncher.launch(arrayOf("text/*", "application/octet-stream")) })
         if (importing) { Spacer(Modifier.height(10.dp)); CircularProgressIndicator() }
         if (showPathDialog) {
             AlertDialog(onDismissRequest = { showPathDialog = false }, confirmButton = { TextButton(onClick = { showPathDialog = false; dirPicker.launch(null) }) { Text("选择文件夹") } }, dismissButton = { TextButton(onClick = { viewModel.resetDir(); showPathDialog = false }) { Text("恢复默认") } }, title = { Text("存储路径") }, text = {

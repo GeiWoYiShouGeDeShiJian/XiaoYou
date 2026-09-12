@@ -1,5 +1,6 @@
 package com.example.jizhangruanjian.ui.components
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,7 +23,6 @@ fun AppTopBar(
     title: String,
     onBack: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
-    scrollBehavior: androidx.compose.material3.TopAppBarScrollBehavior? = null,
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
@@ -33,7 +33,6 @@ fun AppTopBar(
             }
         },
         actions = actions,
-        scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
             navigationIconContentColor = MaterialTheme.colorScheme.onSurface,

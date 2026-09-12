@@ -1,5 +1,6 @@
 package com.example.jizhangruanjian.ui.components
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -28,9 +29,12 @@ fun AppCard(
     Card(
         modifier = modifier,
         shape = shape,
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        contentPadding = contentPadding
-    ) { content() }
+        colors = CardDefaults.cardColors(containerColor = containerColor)
+    ) {
+        Column(modifier = Modifier.padding(contentPadding)) {
+            content()
+        }
+    }
 }
 @Composable
 fun AppCard(
@@ -45,9 +49,12 @@ fun AppCard(
         onClick = onClick,
         modifier = modifier,
         shape = shape,
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        contentPadding = contentPadding
-    ) { content() }
+        colors = CardDefaults.cardColors(containerColor = containerColor)
+    ) {
+        Column(modifier = Modifier.padding(contentPadding)) {
+            content()
+        }
+    }
 }
 @Preview(showBackground = true)
 @Composable
