@@ -63,6 +63,7 @@ import com.example.jizhangruanjian.ui.components.AppButton
 import com.example.jizhangruanjian.ui.components.AppButtonVariant
 import com.example.jizhangruanjian.ui.components.AppTopBar
 import com.example.jizhangruanjian.ui.components.CategoryIcon
+import com.example.jizhangruanjian.ui.theme.BalanceCardColors
 import com.example.jizhangruanjian.ui.theme.AppSize
 import com.example.jizhangruanjian.ui.theme.AppSpacing
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -133,22 +134,22 @@ fun AccountDetailScreen(viewModel: AccountDetailViewModel = hiltViewModel(), acc
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = acc.name, onBack = onBack, actions = { TextButton(onClick = onEdit) { Text("编辑", color = MaterialTheme.colorScheme.primary) } }) }) { pad ->
             Column(modifier = Modifier.fillMaxSize().padding(pad)) {
-                Box(modifier = Modifier.padding(horizontal = AppSpacing.lg).fillMaxWidth().clip(MaterialTheme.shapes.extraLarge).background(Brush.linearGradient(listOf(Color(0xFFBBD7F2), Color(0xFF9EC2EA)))).padding(AppSpacing.xl)) {
+                Box(modifier = Modifier.padding(horizontal = AppSpacing.lg).fillMaxWidth().clip(MaterialTheme.shapes.extraLarge).background(Brush.linearGradient(listOf(BalanceCardColors.gradientStart, BalanceCardColors.gradientEnd))).padding(AppSpacing.xl)) {
                     Column {
-                        Text("人民币余额", color = Color(0xFF2C4E70), fontSize = 13.sp)
+                        Text("人民币余额", color = BalanceCardColors.label, fontSize = 13.sp)
                         Spacer(Modifier.height(6.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(Formatters.yuanText(acc.balance), color = Color(0xFF1A3A5C), fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                            Text(Formatters.yuanText(acc.balance), color = BalanceCardColors.amount, fontSize = 30.sp, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.width(AppSpacing.sm))
-                            Icon(Icons.Filled.Edit, contentDescription = "修改余额", tint = Color(0xFF2C4E70), modifier = Modifier.size(AppSize.iconSmall).clickable { balanceDialog = true })
+                            Icon(Icons.Filled.Edit, contentDescription = "修改余额", tint = BalanceCardColors.label, modifier = Modifier.size(AppSize.iconSmall).clickable { balanceDialog = true })
                         }
                         Spacer(Modifier.height(AppSpacing.lg))
                         Row {
-                            Text("流入 ", color = Color(0xFF2C4E70), fontSize = 14.sp)
-                            Text(Formatters.yuanText(totalIn), color = Color(0xFF1A3A5C), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Text("流入 ", color = BalanceCardColors.label, fontSize = 14.sp)
+                            Text(Formatters.yuanText(totalIn), color = BalanceCardColors.amount, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                             Spacer(Modifier.width(AppSpacing.lg))
-                            Text("流出 ", color = Color(0xFF2C4E70), fontSize = 14.sp)
-                            Text(Formatters.yuanText(totalOut), color = Color(0xFF1A3A5C), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Text("流出 ", color = BalanceCardColors.label, fontSize = 14.sp)
+                            Text(Formatters.yuanText(totalOut), color = BalanceCardColors.amount, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }

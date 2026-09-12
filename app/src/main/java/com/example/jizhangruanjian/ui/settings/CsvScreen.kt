@@ -72,14 +72,15 @@ import com.example.jizhangruanjian.data.model.Ledger
 import com.example.jizhangruanjian.ui.components.AppButton
 import com.example.jizhangruanjian.ui.components.AppButtonVariant
 import com.example.jizhangruanjian.ui.components.AppTopBar
+import com.example.jizhangruanjian.ui.theme.ImportBrandColors
 import com.example.jizhangruanjian.ui.theme.AppSize
 import com.example.jizhangruanjian.ui.theme.AppSpacing
 // 账单导入与导出：双 Tab（导入来源选择 + 导出时间范围）
 private data class ImportSource(val label: String, val button: String, val icon: ImageVector, val color: Color, val help: String)
 private val SOURCES = listOf(
-    ImportSource("微信支付账单", "导入微信支付账单", Icons.Filled.Chat, Color(0xFF1AAD19), "账单获取：微信 - 我 - 服务 - 钱包 - 账单 - 右上角\"...\" - 下载账单 - 用于个人对账。接收方式选择微信，下载后直接长按文件 - 发送 - 导入到小柚记账。"),
-    ImportSource("支付宝账单", "导入支付宝账单", Icons.Filled.AccountBalanceWallet, Color(0xFF1677FF), "账单获取：支付宝 - 我的 - 账单 - 右上角\"...\" - 开具交易流水证明，下载后导入。"),
-    ImportSource("通用模板导入（推荐）", "导入模板文件", Icons.Filled.TableChart, Color(0xFF1D6F42), "列固定：类型/日期/大类/小类/金额/账户/账户2/备注/图片/颜色/标签/账本/商家；类型支持支出、收入、转账、借、贷、应付款、应收款；导入按去重规则自动跳过重复记录。"))
+    ImportSource("微信支付账单", "导入微信支付账单", Icons.Filled.Chat, ImportBrandColors.wechat, "账单获取：微信 - 我 - 服务 - 钱包 - 账单 - 右上角\"...\" - 下载账单 - 用于个人对账。接收方式选择微信，下载后直接长按文件 - 发送 - 导入到小柚记账。"),
+    ImportSource("支付宝账单", "导入支付宝账单", Icons.Filled.AccountBalanceWallet, ImportBrandColors.alipay, "账单获取：支付宝 - 我的 - 账单 - 右上角\"...\" - 开具交易流水证明，下载后导入。"),
+    ImportSource("通用模板导入（推荐）", "导入模板文件", Icons.Filled.TableChart, ImportBrandColors.bankTemplate, "列固定：类型/日期/大类/小类/金额/账户/账户2/备注/图片/颜色/标签/账本/商家；类型支持支出、收入、转账、借、贷、应付款、应收款；导入按去重规则自动跳过重复记录。"))
 private const val TEMPLATE_CSV = "说明：可以使用Excel等进行编辑，请将对应应用的数据按要求复制进本模板中，注意不要新建文件，否则可能缺少必要的合格模板字段导致导入失败。\n" +
     "注意：【必填字段】类型、日期、金额、账户不能为空；选填字段可用\"/\"代替，也可以不填。\n" +
     "【类型】只允许填写：支出、收入、转账、借、贷、应付款、应收款；日期格式如 2021/10/10 06:10:01，也可只写 2021/10/01。\n" +

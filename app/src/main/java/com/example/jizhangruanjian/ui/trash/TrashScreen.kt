@@ -47,9 +47,9 @@ import com.example.jizhangruanjian.domain.model.TransactionDisplay
 import com.example.jizhangruanjian.ui.components.AppButton
 import com.example.jizhangruanjian.ui.components.AppButtonVariant
 import com.example.jizhangruanjian.ui.components.AppTopBar
+import com.example.jizhangruanjian.ui.theme.NeutralColors
 import com.example.jizhangruanjian.ui.theme.AppSize
 import com.example.jizhangruanjian.ui.theme.AppSpacing
-private val CARD_BG = Color(0xFFF3F4F6)
 private val INCOME_GREEN = SemanticColors.IncomeGreen
 private val EXPENSE_RED = SemanticColors.ExpenseRed
 private enum class TrashSection(val title: String) {
@@ -73,7 +73,7 @@ fun TrashScreen(onBack: () -> Unit, viewModel: TrashViewModel = hiltViewModel())
                 Spacer(Modifier.height(10.dp))
                 TrashEntryCard(Icons.Filled.ReceiptLong, "明细", trashTx.size) { section = TrashSection.TX }
                 Spacer(Modifier.height(AppSpacing.xl))
-                Text("已删除的数据会被存放在回收站中", style = MaterialTheme.typography.bodySmall, color = Color(0xFF9AA0A6), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                Text("已删除的数据会被存放在回收站中", style = MaterialTheme.typography.bodySmall, color = NeutralColors.textMuted, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
             }
         }
     } else {
@@ -92,15 +92,15 @@ private fun trashAmountText(tx: TransactionDisplay): String = when (tx.type) {
 private fun trashColor(tx: TransactionDisplay): Color = when (tx.type) {
     TransactionType.INCOME -> INCOME_GREEN
     TransactionType.EXPENSE -> EXPENSE_RED
-    else -> Color(0xFF333333)
+    else -> NeutralColors.textPrimary
 }
 @Composable
 private fun TrashEntryCard(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, count: Int, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(CARD_BG).clickable(onClick = onClick).padding(horizontal = AppSpacing.lg, vertical = 18.dp)) {
-        Icon(icon, contentDescription = label, modifier = Modifier.size(AppSize.iconLarge), tint = Color(0xFF333333))
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(NeutralColors.surfaceMuted).clickable(onClick = onClick).padding(horizontal = AppSpacing.lg, vertical = 18.dp)) {
+        Icon(icon, contentDescription = label, modifier = Modifier.size(AppSize.iconLarge), tint = NeutralColors.textPrimary)
         Spacer(Modifier.width(14.dp))
         Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Text(count.toString(), style = MaterialTheme.typography.bodyLarge, color = Color(0xFF666666))
+        Text(count.toString(), style = MaterialTheme.typography.bodyLarge, color = NeutralColors.textSecondary)
     }
 }
 private data class TrashRow(val id: Long, val title: String, val subtitle: String, val amount: String?, val amountColor: Color?)
@@ -114,11 +114,11 @@ private fun TrashListScreen(title: String, onBack: () -> Unit, items: List<Trash
             LazyColumn(modifier = Modifier.weight(1f).padding(horizontal = AppSpacing.lg), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             items(items, key = { it.id }) { row ->
                 val checked = row.id in selected
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(CARD_BG).clickable { if (checked) selected.remove(row.id) else selected.add(row.id) }.padding(horizontal = AppSpacing.sm, vertical = 10.dp)) {
-                    Checkbox(checked = checked, onCheckedChange = { if (it) selected.add(row.id) else selected.remove(row.id) }, colors = CheckboxDefaults.colors(checkedColor = Color(0xFF333333)))
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(NeutralColors.surfaceMuted).clickable { if (checked) selected.remove(row.id) else selected.add(row.id) }.padding(horizontal = AppSpacing.sm, vertical = 10.dp)) {
+                    Checkbox(checked = checked, onCheckedChange = { if (it) selected.add(row.id) else selected.remove(row.id) }, colors = CheckboxDefaults.colors(checkedColor = NeutralColors.textPrimary))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(row.title, style = MaterialTheme.typography.bodyLarge)
-                        Text(row.subtitle, style = MaterialTheme.typography.bodySmall, color = Color(0xFF9AA0A6))
+                        Text(row.subtitle, style = MaterialTheme.typography.bodySmall, color = NeutralColors.textMuted)
                     }
                     if (row.amount != null) {
                         Column(horizontalAlignment = Alignment.End) {
@@ -129,7 +129,7 @@ private fun TrashListScreen(title: String, onBack: () -> Unit, items: List<Trash
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).navigationBarsPadding().padding(horizontal = AppSpacing.lg, vertical = 10.dp)) {
-            Checkbox(checked = allSelected, onCheckedChange = { if (it) { selected.clear(); items.forEach { r -> selected.add(r.id) } } else selected.clear() }, colors = CheckboxDefaults.colors(checkedColor = Color(0xFF333333)))
+            Checkbox(checked = allSelected, onCheckedChange = { if (it) { selected.clear(); items.forEach { r -> selected.add(r.id) } } else selected.clear() }, colors = CheckboxDefaults.colors(checkedColor = NeutralColors.textPrimary))
             Text("全选", style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.weight(1f))
             AppButton(text = "彻底删除", onClick = { onDelete(selected.toList()); selected.clear() }, enabled = hasSelection, variant = AppButtonVariant.Outlined)
