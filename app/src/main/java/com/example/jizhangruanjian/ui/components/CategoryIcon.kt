@@ -15,19 +15,20 @@ import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
+import com.example.jizhangruanjian.ui.theme.CategoryColors
 // 支出 17 大类专属强调色，按路径分组号取色；字形用该色着色，无底框
 private val EXPENSE_GROUP_COLORS = mapOf(
-    "01" to Color(0xFFE53935), "02" to Color(0xFFFF9800), "03" to Color(0xFFF06292),
-    "04" to Color(0xFF1E88E5), "05" to Color(0xFF8E24AA), "06" to Color(0xFF00ACC1),
-    "07" to Color(0xFFFF7043), "08" to Color(0xFF43A047), "09" to Color(0xFF3949AB),
-    "10" to Color(0xFFD81B60), "11" to Color(0xFFF9A825), "12" to Color(0xFF5C6BC0),
-    "13" to Color(0xFF26A69A), "14" to Color(0xFF78909C), "15" to Color(0xFFFBC02D),
-    "16" to Color(0xFF8D6E63), "17" to Color(0xFF66BB6A)
+    "01" to CategoryColors.expense01, "02" to CategoryColors.expense02, "03" to CategoryColors.expense03,
+    "04" to CategoryColors.expense04, "05" to CategoryColors.expense05, "06" to CategoryColors.expense06,
+    "07" to CategoryColors.expense07, "08" to CategoryColors.expense08, "09" to CategoryColors.expense09,
+    "10" to CategoryColors.expense10, "11" to CategoryColors.expense11, "12" to CategoryColors.expense12,
+    "13" to CategoryColors.expense13, "14" to CategoryColors.expense14, "15" to CategoryColors.expense15,
+    "16" to CategoryColors.expense16, "17" to CategoryColors.expense17
 )
 // 收入 5 大类专属强调色
 private val INCOME_GROUP_COLORS = mapOf(
-    "01" to Color(0xFF2E7D32), "02" to Color(0xFF0288D1), "03" to Color(0xFF00897B),
-    "04" to Color(0xFFF9A825), "05" to Color(0xFF7B1FA2)
+    "01" to CategoryColors.income01, "02" to CategoryColors.income02, "03" to CategoryColors.income03,
+    "04" to CategoryColors.income04, "05" to CategoryColors.income05
 )
 private var svgLoader: ImageLoader? = null
 @Composable

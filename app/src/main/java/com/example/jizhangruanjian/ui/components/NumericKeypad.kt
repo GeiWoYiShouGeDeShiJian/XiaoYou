@@ -26,14 +26,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.AppSpacing
+import com.example.jizhangruanjian.ui.theme.KeypadColors
 enum class KeypadAction { DELETE, SAVE, SAVE_AND_CONTINUE, TOGGLE_CALCULATOR, APPLY }
-private val gap = 8.dp
+private val gap = AppSpacing.sm
 private val keyShape = RoundedCornerShape(26.dp)
-private val deleteBg = Color(0xFFF7DCEA)
-private val againBg = Color(0xFFD8EAF8)
-private val saveBg = Color(0xFFCBDEF0)
-private val saveText = Color(0xFF2B5F8F)
-private val eqBg = Color(0xFF8FBFEF)
+private val deleteBg = KeypadColors.deleteBg
+private val againBg = KeypadColors.repeatBg
+private val saveBg = KeypadColors.saveBg
+private val saveText = KeypadColors.saveText
+private val eqBg = KeypadColors.equalBg
 // 偏好：hapticEnabled 触感反馈 / reversed 倒序数字 / keySize 按键高度
 @Composable
 fun NumericKeypad(onKey: (String) -> Unit, onAction: (KeypadAction) -> Unit, isCalculatorMode: Boolean, displayText: String, modifier: Modifier = Modifier, secondaryLabel: String = "再记", hapticEnabled: Boolean = false, reversed: Boolean = false, keySize: Dp = 52.dp) {
@@ -43,7 +46,7 @@ fun NumericKeypad(onKey: (String) -> Unit, onAction: (KeypadAction) -> Unit, isC
     val rows = if (reversed) listOf(listOf("7", "8", "9"), listOf("4", "5", "6"), listOf("1", "2", "3")) else listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9"))
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(gap)) {
         if (isCalculatorMode) {
-            Text(displayText, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
+            Text(displayText, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.sm))
             Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
                 Column(modifier = Modifier.weight(3f), verticalArrangement = Arrangement.spacedBy(gap)) {
                     rows.forEach { r -> KeypadRow { r.forEach { d -> DigitKey(onKey, d, kh, tap) } } }
@@ -89,7 +92,7 @@ private fun RowScope.DigitKey(onKey: (String) -> Unit, k: String, h: Dp, tap: ()
 @Composable
 private fun RowScope.IconKey(onClick: () -> Unit, h: Dp, tap: () -> Unit) {
     Box(modifier = Modifier.weight(1f).height(h).clip(keyShape).background(MaterialTheme.colorScheme.surface).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
-        Icon(Icons.Filled.Calculate, contentDescription = "计算器", modifier = Modifier.height(24.dp), tint = MaterialTheme.colorScheme.onSurface)
+        Icon(Icons.Filled.Calculate, contentDescription = "计算器", modifier = Modifier.height(AppSize.iconLarge), tint = MaterialTheme.colorScheme.onSurface)
     }
 }
 @Composable
