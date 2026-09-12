@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -21,9 +20,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 @Composable
 fun MoneyBookCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Surface(modifier = modifier, shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
+    Surface(modifier = modifier, shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainer) {
         content()
     }
 }
@@ -39,7 +39,7 @@ fun MoneyBookFab(onClick: () -> Unit, icon: ImageVector, contentDescription: Str
 }
 @Composable
 fun EmptyState(modifier: Modifier = Modifier, icon: ImageVector, title: String, subtitle: String? = null, ctaText: String? = null, onCta: (() -> Unit)? = null) {
-    Column(modifier = modifier.fillMaxWidth().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier = modifier.fillMaxWidth().padding(AppSpacing.xl), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
         val containerColor = MaterialTheme.colorScheme.primaryContainer
         val iconColor = MaterialTheme.colorScheme.primary
         Box(modifier = Modifier.size(80.dp), contentAlignment = Alignment.Center) {

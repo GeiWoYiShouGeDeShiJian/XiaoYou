@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 // 可滚动设置页统一骨架：顶部大标题，页面向下滑动后标题缩到返回键旁并常驻
 @Composable
 fun CollapsingTitleScaffold(title: String, onBack: () -> Unit, trailing: @Composable RowScope.() -> Unit = {}, content: @Composable ColumnScope.() -> Unit) {
@@ -49,7 +50,7 @@ fun CollapsingTitleScaffold(title: String, onBack: () -> Unit, trailing: @Compos
                 trailing()
             }
             Column(Modifier.weight(1f).verticalScroll(scroll)) {
-                Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+                Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.sm))
                 content()
             }
         }
