@@ -1,5 +1,6 @@
 package com.example.jizhangruanjian.ui.statistics
 import com.example.jizhangruanjian.ui.theme.SemanticColors
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -112,7 +113,7 @@ fun StatisticsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = AppSpacing.lg)
         ) {
             summary?.let { s ->
                 // 当前类型的金额与分类
@@ -130,7 +131,7 @@ fun StatisticsScreen(
                     onTypeToggle = { viewModel.toggleType(it) }
                 )
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(AppSpacing.lg))
 
                 // ═══════════════════ ③ KPI 区（2×2 数据概览卡）═══════════════════
                 KpiGrid(
@@ -140,19 +141,19 @@ fun StatisticsScreen(
                     expenseType = expenseType
                 )
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(AppSpacing.xl))
 
                 // ═══════════════════ ④ 趋势折线图（面积样式）══════════════════
                 val trendValues = if (expenseType == TransactionType.EXPENSE) monthlyExpense else monthlyIncome
                 ReportCard {
-                    Column(modifier = Modifier.padding(20.dp)) {
+                    Column(modifier = Modifier.padding(AppSpacing.xl)) {
                         Text(
                             text = "${calendarMonth.year}年${calendarMonth.monthValue}月${if (expenseType == TransactionType.EXPENSE) "支出" else "收入"}趋势",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = onSurface
                         )
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(AppSpacing.lg))
                         TrendAreaChart(
                             values = trendValues,
                             labels = monthShortLabels(calendarMonth),
@@ -161,11 +162,11 @@ fun StatisticsScreen(
                     }
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(AppSpacing.xl))
 
                 // ═══════════════════ ⑤ 支出分类构成环形图（中心总额）══════════════════
                 ReportCard {
-                    Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(modifier = Modifier.padding(AppSpacing.xl), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "${calendarMonth.year}年${calendarMonth.monthValue}月${if (expenseType == TransactionType.EXPENSE) "支出" else "收入"}分类构成",
                             style = MaterialTheme.typography.titleMedium,
@@ -173,7 +174,7 @@ fun StatisticsScreen(
                             color = onSurface,
                             modifier = Modifier.fillMaxWidth()
                         )
-                        Spacer(Modifier.height(20.dp))
+                        Spacer(Modifier.height(AppSpacing.xl))
                         DonutWithCenterTotal(
                             rank = rank,
                             colors = catColors,
@@ -184,35 +185,35 @@ fun StatisticsScreen(
                     }
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(AppSpacing.xl))
 
                 // ═══════════════════ ⑥ 分类排行列表 ═══════════════════
                 if (rank.isNotEmpty() && currentAmount > 0L) {
                     ReportCard {
-                        Column(modifier = Modifier.padding(20.dp)) {
+                        Column(modifier = Modifier.padding(AppSpacing.xl)) {
                             Text(
                                 text = "${calendarMonth.year}年${calendarMonth.monthValue}月${if (expenseType == TransactionType.EXPENSE) "支出" else "收入"}排行",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = onSurface
                             )
-                            Spacer(Modifier.height(16.dp))
+                            Spacer(Modifier.height(AppSpacing.lg))
                             CategoryRankList(rank = rank, totals = currentAmount, colors = catColors)
                         }
                     }
-                    Spacer(Modifier.height(20.dp))
+                    Spacer(Modifier.height(AppSpacing.xl))
                 }
 
                 // ═══════════════════ ⑦ 月度对比柱状图（当前月高亮）══════════════════
                 ReportCard {
-                    Column(modifier = Modifier.padding(20.dp)) {
+                    Column(modifier = Modifier.padding(AppSpacing.xl)) {
                         Text(
                             text = "月${if (expenseType == TransactionType.EXPENSE) "支出" else "收入"}对比",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = onSurface
                         )
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(AppSpacing.lg))
                         MonthlyComparisonChart(
                             values = if (expenseType == TransactionType.EXPENSE) monthlyExpense else monthlyIncome,
                             labels = monthComparisonLabels(calendarMonth),
@@ -222,25 +223,25 @@ fun StatisticsScreen(
                     }
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(AppSpacing.xl))
 
                 // ═══════════════════ ⑧ 单笔支出/收入排行明细 ═══════════════════
                 if (recentTxs.isNotEmpty()) {
                     ReportCard {
-                        Column(modifier = Modifier.padding(20.dp)) {
+                        Column(modifier = Modifier.padding(AppSpacing.xl)) {
                             Text(
                                 text = "${calendarMonth.year}年${calendarMonth.monthValue}月${if (expenseType == TransactionType.EXPENSE) "支出" else "收入"}排行",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = onSurface
                             )
-                            Spacer(Modifier.height(12.dp))
+                            Spacer(Modifier.height(AppSpacing.md))
                             TransactionRankList(transactions = recentTxs, type = expenseType)
                         }
                     }
                 }
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(AppSpacing.xxxl))
             } ?: run {
                 // 加载中
                 Box(
@@ -282,11 +283,11 @@ private fun ReportTopBar(
     val brand = com.example.jizhangruanjian.ui.theme.ReportBrandColor
     val surfaceContainerHigh = MaterialTheme.colorScheme.surfaceContainerHigh
 
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg)) {
         // 标题行：返回 + 标题 + 账本切换
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 12.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = AppSpacing.sm, bottom = AppSpacing.md)
         ) {
             IconButton(onClick = onMenuClick, modifier = Modifier.size(40.dp)) {
                 Icon(Icons.Filled.ChevronLeft, contentDescription = "返回", tint = MaterialTheme.colorScheme.onSurface)
@@ -296,7 +297,7 @@ private fun ReportTopBar(
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f).padding(start = 8.dp)
+                modifier = Modifier.weight(1f).padding(start = AppSpacing.sm)
             )
             // 隐藏了"订阅设置"，仅保留账本切换图标
             IconButton(onClick = onOpenLedgerPicker, modifier = Modifier.size(40.dp)) {
@@ -358,7 +359,7 @@ private fun MonthSwitchBar(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)
     ) {
         // 左侧：月份切换
         Row(
@@ -503,12 +504,12 @@ private fun KpiCard(
     valueColor: Color,
     containerColor: Color
 ) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = containerColor,
-        tonalElevation = 0.dp
-    ) {
+        Surface(
+            modifier = modifier,
+            shape = MaterialTheme.shapes.large,
+            color = containerColor,
+            tonalElevation = 0.dp
+        ) {
         Column(
             modifier = Modifier.padding(14.dp)
         ) {
@@ -518,7 +519,7 @@ private fun KpiCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             Text(
                 text = value,
                 style = MaterialTheme.typography.titleMedium.copy(
@@ -654,17 +655,17 @@ private fun DonutWithCenterTotal(
 
         // 右侧：分类图例列表（名称 + 百分比）
         if (!empty) {
-            Column(
-                modifier = Modifier.weight(1f).padding(start = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+        Column(
+            modifier = Modifier.weight(1f).padding(start = AppSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
                 rank.take(6).forEachIndexed { i, (c, cat) ->
                     val pct = if (total > 0L) c.total * 100f / total else 0f
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Box(
-                            modifier = Modifier.size(8.dp).background(colors[i % colors.size], CircleShape)
+                            modifier = Modifier.size(AppSpacing.sm).background(colors[i % colors.size], CircleShape)
                         )
-                        Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(AppSpacing.sm))
                         Text(
                             text = cat?.name ?: "未分类",
                             style = MaterialTheme.typography.bodySmall,
@@ -705,14 +706,14 @@ private fun CategoryRankList(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { /* TODO: 跳转到分类详情 */ }
-                .padding(vertical = 12.dp)
+                .padding(vertical = AppSpacing.md)
         ) {
             // 序号
             Text(
                 text = "${index + 1}",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = if (index < 3) brand else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.width(24.dp),
+                modifier = Modifier.width(AppSpacing.xxl),
                 textAlign = TextAlign.Center
             )
 
@@ -735,16 +736,16 @@ private fun CategoryRankList(
                     maxLines = 1
                 )
                 // 占比进度条
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(AppSpacing.xs))
                 Surface(
                     shape = RoundedCornerShape(2.dp),
                     color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    modifier = Modifier.fillMaxWidth().height(4.dp)
+                    modifier = Modifier.fillMaxWidth().height(AppSpacing.xs)
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(pct.coerceIn(0f, 1f))
-                            .height(4.dp)
+                            .height(AppSpacing.xs)
                             .background(displayColor.copy(alpha = 0.7f))
                     )
                 }
@@ -760,7 +761,7 @@ private fun CategoryRankList(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(AppSpacing.xs))
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = "", tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f), modifier = Modifier.size(18.dp))
         }
 
@@ -827,7 +828,7 @@ private fun MonthlyComparisonChart(
         }
 
         // X 轴月份标签
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(AppSpacing.xs))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -920,7 +921,7 @@ private fun TransactionRankList(transactions: List<TransactionDisplay>, type: Tr
 @Composable
 private fun ReportCard(content: @Composable () -> Unit) {
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,

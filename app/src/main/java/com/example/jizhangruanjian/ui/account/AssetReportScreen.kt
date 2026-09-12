@@ -1,5 +1,7 @@
 package com.example.jizhangruanjian.ui.account
 import com.example.jizhangruanjian.ui.theme.SemanticColors
+import com.example.jizhangruanjian.ui.theme.AppSpacing
+import com.example.jizhangruanjian.ui.theme.ChartAuxColors
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -96,31 +98,31 @@ fun AssetReportScreen(viewModel: AssetReportViewModel = hiltViewModel(), onBack:
             Text("资产报表", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
             IconButton(onClick = { showSettings = true }) { Icon(Icons.Filled.Settings, contentDescription = "设置") }
         }
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp)) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = AppSpacing.md)) {
             val maxSlices = config.reportMaxSlices ?: 10
             val entries = if (assetDim == 0) netAccounts.map { it.name to it.balance } else netAccounts.groupBy { it.type }.map { (t, list) -> typeLabel(t) + "·" + (if (list.size == 1) list[0].name else list.take(2).joinToString("、") { it.name } + if (list.size > 2) "等" else "") to list.sumOf { it.balance } }
             if (config.reportShowAssets != false) {
                 val assetParts = composeParts(entries, maxSlices, positiveDominant = true)
                 ReportCard("资产构成") {
                     DonutChart(parts = assetParts, centerLabel = "总资产", centerValue = Formatters.yuanText(totalAsset))
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(AppSpacing.md))
                     CenterChip("账户", "类型", assetDim, modifier = Modifier.align(Alignment.CenterHorizontally)) { assetDim = it }
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(AppSpacing.md))
             }
             if (config.reportShowDebts != false) {
                 val debtParts = composeParts(entries, maxSlices, positiveDominant = false)
                 ReportCard("负债构成") {
                     DonutChart(parts = debtParts, centerLabel = "总负债", centerValue = Formatters.yuanText(totalDebt))
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(AppSpacing.md))
                     CenterChip("账户", "类型", debtDim, modifier = Modifier.align(Alignment.CenterHorizontally)) { debtDim = it }
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(AppSpacing.md))
             }
             ReportCard("净资产趋势") {
                 val trend = if (trendDim == 0) monthly else yearly
                 TrendChart(trend)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(AppSpacing.sm))
                 Text("净资产 ${Formatters.yuanText(trend.lastOrNull()?.end ?: 0L)}", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(10.dp))
                 CenterChip("月统计", "年统计", trendDim, modifier = Modifier.align(Alignment.CenterHorizontally)) { trendDim = it }
@@ -135,7 +137,7 @@ fun AssetReportScreen(viewModel: AssetReportViewModel = hiltViewModel(), onBack:
                     }
                     Spacer(Modifier.height(6.dp))
                     rows.take(if (showAllRows) rows.size else 6).forEach { p ->
-                        Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)).padding(vertical = 10.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)).padding(vertical = 10.dp)) {
                             Text(p.label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                             Text(Formatters.yuanText(p.change), style = MaterialTheme.typography.bodyMedium, color = if (p.change >= 0) SemanticColors.IncomeGreen else MaterialTheme.colorScheme.error, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                             Text(Formatters.yuanText(p.end), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
@@ -147,7 +149,7 @@ fun AssetReportScreen(viewModel: AssetReportViewModel = hiltViewModel(), onBack:
                     }
                 }
             }
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(AppSpacing.xxl))
         }
     }
     if (showSettings) ReportSettingsDialog(viewModel = viewModel, onDismiss = { showSettings = false })
@@ -158,7 +160,7 @@ private fun ReportSettingsDialog(viewModel: AssetReportViewModel, onDismiss: () 
     val config by viewModel.store.config.collectAsState()
     var sliceMenu by remember { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 28.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xl).padding(bottom = 28.dp)) {
             Box(modifier = Modifier.align(Alignment.CenterHorizontally).width(36.dp).height(4.dp).clip(RoundedCornerShape(2.dp)).background(MaterialTheme.colorScheme.surfaceVariant))
             Spacer(Modifier.height(20.dp))
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
@@ -186,14 +188,14 @@ private fun ReportSettingsDialog(viewModel: AssetReportViewModel, onDismiss: () 
 }
 @Composable
 private fun ReportCard(title: String, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.surface).padding(AppSpacing.lg)) {
         Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(14.dp))
         content()
     }
 }
 private val DONUT_COLORS = listOf(0xFF4E79A7, 0xFFF28E2B, 0xFFE15759, 0xFF76B7B2, 0xFF59A14F, 0xFFEDC948, 0xFFB07AA1, 0xFFFF9DA7, 0xFF9C755F, 0xFFBAB0AC).map { Color(it) }
-private val OTHER_COLOR = Color(0xFFC9CDD4)
+private val OTHER_COLOR = ChartAuxColors.pieOther
 private data class DonutPart(val label: String, val amount: Long, val color: Color, val sweep: Float)
 private const val SMALL_SLICE_DEG = 4f
 private fun composeParts(entries: List<Pair<String, Long>>, maxSlices: Int, positiveDominant: Boolean): List<DonutPart> {
@@ -254,7 +256,7 @@ private fun DonutChart(parts: List<DonutPart>, centerLabel: String, centerValue:
             val arcTopLeft = Offset(cx - ringR - stroke / 2f, cy - ringR - stroke / 2f)
             val arcSize = Size((ringR + stroke / 2f) * 2f, (ringR + stroke / 2f) * 2f)
             if (parts.isEmpty()) {
-                drawArc(color = Color(0xFFE0E0E0), startAngle = 0f, sweepAngle = 360f, useCenter = false, topLeft = arcTopLeft, size = arcSize, style = Stroke(width = stroke, cap = StrokeCap.Butt))
+                drawArc(color = ChartAuxColors.ringTrack, startAngle = 0f, sweepAngle = 360f, useCenter = false, topLeft = arcTopLeft, size = arcSize, style = Stroke(width = stroke, cap = StrokeCap.Butt))
             } else {
                 var start = 45f + rotation
                 parts.forEachIndexed { i, p ->
@@ -272,7 +274,7 @@ private fun DonutChart(parts: List<DonutPart>, centerLabel: String, centerValue:
                     val ex = cx + cosv * (ringR + stroke / 2f + 22.dp.toPx())
                     val ey = (cy + sinv * (ringR + stroke / 2f + 22.dp.toPx())).coerceIn(14f, size.height - 14f)
                     val text = p.label + " " + if (showPercent) "%.1f%%".format(p.sweep * 100.0 / 360.0) else Formatters.yuanText(p.amount)
-                    val measured = textMeasurer.measure(text, TextStyle(fontSize = 11.sp, color = Color(0xFF505866)))
+                    val measured = textMeasurer.measure(text, TextStyle(fontSize = 11.sp, color = ChartAuxColors.textAxis))
                     drawLine(p.color, Offset(sx, sy), Offset(ex, ey), strokeWidth = 1.dp.toPx())
                     val tail = 8.dp.toPx()
                     if (cosv >= 0) {
@@ -310,7 +312,7 @@ private fun CenterChip(left: String, right: String, selected: Int, modifier: Mod
 @Composable
 private fun TrendChart(points: List<AssetReportViewModel.TrendPoint>) {
     if (points.size < 2) {
-        Text("数据不足", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp), textAlign = TextAlign.Center)
+        Text("数据不足", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.xxl), textAlign = TextAlign.Center)
         return
     }
     var sel by remember { mutableIntStateOf(-1) }
@@ -331,9 +333,9 @@ private fun TrendChart(points: List<AssetReportViewModel.TrendPoint>) {
         fun yF(v: Float) = size.height * (1f - (v - minV) / range)
         for (i in 0..4) {
             val gy = size.height * i / 4f
-            drawLine(Color(0xFFDDE3EA), Offset(padL, gy), Offset(size.width, gy), strokeWidth = 1.dp.toPx(), pathEffect = null)
+            drawLine(ChartAuxColors.grid, Offset(padL, gy), Offset(size.width, gy), strokeWidth = 1.dp.toPx(), pathEffect = null)
             val gv = maxV - range * i / 4f
-            val gTxt = textMeasurer.measure("%.0f".format(gv), TextStyle(fontSize = 9.sp, color = Color(0xFF9AA3AE)))
+            val gTxt = textMeasurer.measure("%.0f".format(gv), TextStyle(fontSize = 9.sp, color = ChartAuxColors.textTick))
             drawText(gTxt, topLeft = Offset(0f, gy - gTxt.size.height / 2f))
         }
         val pts = values.mapIndexed { i, v -> Offset(padL + (size.width - padL) * i / (values.size - 1f), yF(v)) }
@@ -348,12 +350,12 @@ private fun TrendChart(points: List<AssetReportViewModel.TrendPoint>) {
         for (i in 0 until pts.lastIndex) drawLine(SemanticColors.ChartBlue, pts[i], pts[i + 1], strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
         if (sel in points.indices) {
             val sp = pts[sel]
-            drawLine(Color(0xFF90A4AE), Offset(sp.x, 0f), Offset(sp.x, size.height), strokeWidth = 1.dp.toPx())
+            drawLine(ChartAuxColors.verticalGrid, Offset(sp.x, 0f), Offset(sp.x, size.height), strokeWidth = 1.dp.toPx())
             drawCircle(SemanticColors.ChartBlue, radius = 5.dp.toPx(), center = sp)
             drawCircle(Color.White, radius = 2.5.dp.toPx(), center = sp)
             val p = points[sel]
             val txt = "${p.label}  净资产 ${Formatters.yuanText(p.end.toLong())}  变化 ${Formatters.yuanText(p.change)}"
-            val m = textMeasurer.measure(txt, TextStyle(fontSize = 11.sp, color = Color(0xFF37474F)))
+            val m = textMeasurer.measure(txt, TextStyle(fontSize = 11.sp, color = ChartAuxColors.textMonth))
             val bw = m.size.width + 24f
             val bh = m.size.height + 16f
             val bx = (sp.x - bw / 2f).coerceIn(0f, size.width - bw)
