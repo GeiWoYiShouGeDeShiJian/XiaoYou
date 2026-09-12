@@ -1,5 +1,8 @@
 package com.example.jizhangruanjian.ui.record
 import com.example.jizhangruanjian.ui.theme.SemanticColors
+import com.example.jizhangruanjian.ui.theme.AppSpacing
+import com.example.jizhangruanjian.ui.theme.AppSize
+import com.example.jizhangruanjian.ui.theme.TypeBadgeColors
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -50,8 +53,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.DatePickerDialog
@@ -125,6 +126,8 @@ import com.example.jizhangruanjian.ui.components.NumericKeypad
 import com.example.jizhangruanjian.ui.components.CategoryIcon
 import com.example.jizhangruanjian.ui.components.SourceBadge
 import com.example.jizhangruanjian.ui.components.KeypadAction
+import com.example.jizhangruanjian.ui.components.AppButton
+import com.example.jizhangruanjian.ui.components.AppButtonVariant
 import com.example.jizhangruanjian.ui.components.grayscale
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -384,33 +387,33 @@ fun RecordScreen(
     val currentAmount = AmountCalculator.evaluate(if (calcMode) baseExpr else amountExpr)?.let { String.format(java.util.Locale.CHINA, "%.2f", it) } ?: "0.00"
     val amountColor = when { selectedType == TransactionType.EXPENSE && reimbursementStatus == ReimbursementStatus.REIMBURSABLE -> MaterialTheme.colorScheme.onSurface; selectedType == TransactionType.EXPENSE -> expenseRed; selectedType == TransactionType.INCOME -> incomeGreen; else -> MaterialTheme.colorScheme.onSurface }
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xs, vertical = AppSpacing.xs)) {
             IconButton(onClick = onDismiss) { Icon(Icons.Filled.ArrowBack, contentDescription = "返回") }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).clip(RoundedCornerShape(20.dp)).clickable { showLedgerDialog = true }.padding(horizontal = 8.dp, vertical = 6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).clip(MaterialTheme.shapes.extraLarge).clickable { showLedgerDialog = true }.padding(horizontal = AppSpacing.sm, vertical = 6.dp)) {
                 Text(currentLedgerName.ifBlank { "选择账本" }, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "切换账本", modifier = Modifier.size(20.dp))
+                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "切换账本", modifier = Modifier.size(AppSize.iconSize))
             }
             if (editing != null && prefillSource != TransactionSource.MANUAL) SourceBadge(prefillSource)
             IconButton(onClick = { templateSheet = true }) { Icon(painterResource(R.drawable.ic_template_bookmark), contentDescription = "快捷模板", tint = MaterialTheme.colorScheme.primary) }
             IconButton(onClick = { prefPage = true }) { Icon(Icons.Filled.Settings, contentDescription = "记账设置") }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm), modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg)) {
             listOf(TransactionType.EXPENSE, TransactionType.INCOME, TransactionType.TRANSFER, TransactionType.LOAN).forEach { t ->
                 TypeTab(Modifier.weight(1f), t, selectedType, onTypeChange)
             }
         }
-        Column(modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
-            Spacer(Modifier.height(8.dp))
+        Column(modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = AppSpacing.lg)) {
+            Spacer(Modifier.height(AppSpacing.sm))
             // 分类行：仅图标+文字区域触发分类面板，其余留给金额
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable(enabled = selectedType == TransactionType.EXPENSE || selectedType == TransactionType.INCOME) { showCategoryDialog = true }.padding(vertical = 4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clip(MaterialTheme.shapes.medium).clickable(enabled = selectedType == TransactionType.EXPENSE || selectedType == TransactionType.INCOME) { showCategoryDialog = true }.padding(vertical = AppSpacing.xs)) {
                     if (selectedType == TransactionType.EXPENSE || selectedType == TransactionType.INCOME) {
                         CategoryIcon(selectedCat?.icon ?: "❓", size = 40.dp, fontSize = 20.sp, selected = true, modifier = if (reimbursementStatus == ReimbursementStatus.REIMBURSABLE) Modifier.grayscale() else Modifier, fallbackContainer = MaterialTheme.colorScheme.surfaceVariant)
                         Spacer(Modifier.width(10.dp))
                         Text(selectedCat?.name ?: "选择分类", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Text(" ›", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
-                        Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if (selectedType == TransactionType.TRANSFER) Color(0xFFE8E0F2) else Color(0xFFF2E2D4)), contentAlignment = Alignment.Center) {
+                        Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if (selectedType == TransactionType.TRANSFER) TypeBadgeColors.transfer else TypeBadgeColors.expense), contentAlignment = Alignment.Center) {
                             Text(if (selectedType == TransactionType.TRANSFER) "🔄" else "💰", style = MaterialTheme.typography.titleLarge)
                         }
                         Spacer(Modifier.width(10.dp))
@@ -421,17 +424,17 @@ fun RecordScreen(
                 Spacer(Modifier.weight(1f))
                 Text(currentAmount, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = amountColor, modifier = Modifier.clickable(enabled = editing != null) { showKeypad = !showKeypad })
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             // 分类 chips（4 列网格）/ 转账·借贷类型 chips
             when (selectedType) {
                 TransactionType.TRANSFER -> {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                         TextChip("账户互转", true, Modifier.weight(1f)) { }
                     }
                 }
                 TransactionType.LOAN -> {
                     listOf("借入" to LoanDirection.IN, "借出" to LoanDirection.OUT, "还款" to LoanDirection.OUT, "收款" to LoanDirection.IN).chunked(4).forEach { row ->
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                             row.forEach { (label, dir) ->
                                 TextChip(label, loanDirection == dir && label in listOf("借入", "借出"), Modifier.weight(1f)) { loanDirection = dir }
                             }
@@ -440,7 +443,7 @@ fun RecordScreen(
                 }
                 else -> if (showFavCategory) {
                     quickCats.chunked(4).forEach { row ->
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm), modifier = Modifier.padding(bottom = AppSpacing.sm)) {
                             row.forEach { c ->
                                 TextChip(c.name, categoryId == c.id, Modifier.weight(1f)) { categoryId = c.id; catChosenManually = true }
                             }
@@ -449,7 +452,7 @@ fun RecordScreen(
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             // 账户区
             when (selectedType) {
                 TransactionType.TRANSFER -> {
@@ -458,7 +461,7 @@ fun RecordScreen(
                         val to = accounts.firstOrNull { it.id == toAccountId }
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).clickable { accountPickTarget = "from"; showAccountDialog = true }) {
                             Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.width(4.dp))
+                            Spacer(Modifier.width(AppSpacing.xs))
                             Text(from?.name ?: "转出账户", style = MaterialTheme.typography.bodyMedium, maxLines = 1)
                         }
                         IconButton(onClick = { val t = accountId; accountId = toAccountId; toAccountId = t }) {
@@ -466,7 +469,7 @@ fun RecordScreen(
                         }
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).clickable { accountPickTarget = "to"; showAccountDialog = true }, horizontalArrangement = Arrangement.End) {
                             Text(to?.name ?: "转入账户", style = MaterialTheme.typography.bodyMedium, maxLines = 1, textAlign = TextAlign.End)
-                            Spacer(Modifier.width(4.dp))
+                            Spacer(Modifier.width(AppSpacing.xs))
                             Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                         }
                     }
@@ -476,10 +479,10 @@ fun RecordScreen(
                         val member = memberSel.firstOrNull()?.let { mid -> members.firstOrNull { it.id == mid } }
                         Text(if (memberSel.size > 1) memberSel.mapNotNull { mid -> members.firstOrNull { it.id == mid }?.name }.joinToString("，") else (member?.name ?: "未选择"), style = MaterialTheme.typography.bodyMedium, color = if (member == null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, maxLines = 1, modifier = Modifier.weight(1f).clickable { showMemberDialog = true })
                         Icon(Icons.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Spacer(Modifier.width(12.dp))
+                        Spacer(Modifier.width(AppSpacing.md))
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { accountPickTarget = "from"; showAccountDialog = true }) {
                             Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.width(4.dp))
+                            Spacer(Modifier.width(AppSpacing.xs))
                             Text(accounts.firstOrNull { it.id == accountId }?.name ?: "账户", style = MaterialTheme.typography.bodyMedium, maxLines = 1)
                         }
                     }
@@ -489,13 +492,13 @@ fun RecordScreen(
                         Text(if (selectedType == TransactionType.EXPENSE) "付款账户" else "收款账户", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.width(4.dp))
+                            Spacer(Modifier.width(AppSpacing.xs))
                             Text(accounts.firstOrNull { it.id == accountId }?.name ?: "选择账户", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, maxLines = 1)
                         }
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             // 备注行 + 拍照（点击整行打开备注面板）
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { noteSheet = true }) {
                 Text(note.ifEmpty { "备注..." }, style = MaterialTheme.typography.bodyLarge, color = if (note.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface, maxLines = 1, modifier = Modifier.weight(1f))
@@ -504,11 +507,11 @@ fun RecordScreen(
                 }
             }
             if (selectedImagePaths.isNotEmpty()) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm), verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                     selectedImagePaths.forEach { p ->
                         Box {
                             ThumbnailImage(path = p, modifier = Modifier.size(64.dp).clip(CircleShape))
-                            Box(modifier = Modifier.align(Alignment.TopEnd).size(20.dp).background(MaterialTheme.colorScheme.error, CircleShape).clickable { onRemoveImage(p) }, contentAlignment = Alignment.Center) {
+                            Box(modifier = Modifier.align(Alignment.TopEnd).size(AppSize.iconSize).background(MaterialTheme.colorScheme.error, CircleShape).clickable { onRemoveImage(p) }, contentAlignment = Alignment.Center) {
                                 Icon(Icons.Filled.Close, contentDescription = "删除", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onError)
                             }
                         }
@@ -520,7 +523,7 @@ fun RecordScreen(
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             // 属性 chips 第 1 排：顺序/显隐由偏好「记账选项」控制
             val tagChipAnnotated = if (selectedTagIds.isEmpty()) null else buildAnnotatedString {
                 selectedTagIds.mapNotNull { id -> tags.firstOrNull { it.id == id } }.forEachIndexed { index, t ->
@@ -528,7 +531,7 @@ fun RecordScreen(
                     withStyle(SpanStyle(color = Color(t.color))) { append("#${t.name}") }
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm), modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
                 (prefs["rp_chip_order"] ?: "date,time,member,tag,merchant,discount,fee,due,currency").split(",").forEach { key ->
                     if (key in (prefs["rp_chip_hide"] ?: "").split(",")) return@forEach
                     when (key) {
@@ -555,7 +558,7 @@ fun RecordScreen(
                 }
             }
             // 属性 chips 第 2 排：收付款/报销/退款/计入收支与预算，顺序/显隐由「记账选项」控制
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm), modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
                 if (selectedType == TransactionType.EXPENSE || selectedType == TransactionType.INCOME) {
                     (prefs["rp_row2_order"] ?: "pay,reimburse,refund,budget").split(",").forEach { key ->
                         if (key in (prefs["rp_row2_hide"] ?: "").split(",")) return@forEach
@@ -572,16 +575,16 @@ fun RecordScreen(
             }
         }
         if (editing != null && !showKeypad) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)) {
                 if (!detached) {
-                    Text("删除", style = MaterialTheme.typography.titleMedium, color = expenseRed, modifier = Modifier.clickable { onDelete(); onDismiss() }.padding(horizontal = 8.dp, vertical = 12.dp))
+                    Text("删除", style = MaterialTheme.typography.titleMedium, color = expenseRed, modifier = Modifier.clickable { onDelete(); onDismiss() }.padding(horizontal = AppSpacing.sm, vertical = AppSpacing.md))
                     Spacer(Modifier.weight(1f))
                     Text("复制", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.clickable {
                         val cents2 = if (amountExpr.isBlank()) 0L else KeypadCalculator.toCents(amountExpr)
                         val isT = selectedType == TransactionType.TRANSFER
                         onSave(TransactionDomain(id = 0L, ledgerId = editing.ledgerId, accountId = accountId, toAccountId = if (isT) toAccountId else null, categoryId = if (isT || selectedType == TransactionType.LOAN) fallbackCategoryId else categoryId, type = selectedType, amount = cents2, note = note, tradeDate = tradeDate, includeInSummary = include, merchant = merchant.ifBlank { null }, currency = currency, discount = discountCents, fee = if (isT) transferFee else 0L, feePayer = if (isT) transferFeePayer.takeIf { transferFee != 0L } else null, dueDate = if (selectedType == TransactionType.LOAN) dueDate else null, paymentStatus = paymentStatus, reimbursementStatus = reimbursementStatus, refundStatus = refundStatus, memberId = memberSel.firstOrNull(), memberIds = memberSel.filterNotNull(), loanDirection = loanDirection.takeIf { selectedType == TransactionType.LOAN }, tagIds = selectedTagIds), null, selectedImagePaths)
                         onSaveFinished()
-                    }.padding(horizontal = 8.dp, vertical = 12.dp))
+                    }.padding(horizontal = AppSpacing.sm, vertical = AppSpacing.md))
                     Spacer(Modifier.weight(1f))
                     Text("再记", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.clickable {
                         val cents2 = if (amountExpr.isBlank()) 0L else KeypadCalculator.toCents(amountExpr)
@@ -590,13 +593,13 @@ fun RecordScreen(
                         detached = true
                         amountExpr = ""
                         tradeDate = System.currentTimeMillis()
-                    }.padding(horizontal = 8.dp, vertical = 12.dp))
+                    }.padding(horizontal = AppSpacing.sm, vertical = AppSpacing.md))
                     Spacer(Modifier.weight(1f))
                 } else {
-                    Text("已保存为新记录", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 8.dp))
+                    Text("已保存为新记录", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = AppSpacing.sm))
                     Spacer(Modifier.weight(1f))
                 }
-                Button(onClick = { doSave(true) }, shape = RoundedCornerShape(24.dp), modifier = Modifier.weight(1.2f).height(52.dp)) { Text("保存", style = MaterialTheme.typography.titleMedium) }
+                AppButton(text = "保存", onClick = { doSave(true) }, variant = AppButtonVariant.Primary, modifier = Modifier.weight(1.2f))
             }
         } else {
             NumericKeypad(onKey = { k -> if (k.isNotEmpty()) amountExpr = KeypadCalculator.digest(amountExpr, k) }, onAction = { a ->
@@ -607,15 +610,15 @@ fun RecordScreen(
                     KeypadAction.TOGGLE_CALCULATOR -> if (!calcMode) { baseExpr = amountExpr; calcMode = true } else { amountExpr = baseExpr; calcMode = false }
                     KeypadAction.APPLY -> { KeypadCalculator.toCents(amountExpr).takeIf { it > 0L }?.let { amountExpr = Formatters.yuanText(it) }; calcMode = false }
                 }
-            }, isCalculatorMode = calcMode, displayText = amountExpr.ifBlank { "0.00" }, modifier = Modifier.fillMaxWidth().padding(12.dp), hapticEnabled = prefs["rp_haptic"] != "0", reversed = prefs["rp_reverse"] == "1", keySize = keypadKeySize(prefs))
+            }, isCalculatorMode = calcMode, displayText = amountExpr.ifBlank { "0.00" }, modifier = Modifier.fillMaxWidth().padding(AppSpacing.md), hapticEnabled = prefs["rp_haptic"] != "0", reversed = prefs["rp_reverse"] == "1", keySize = keypadKeySize(prefs))
         }
     }
     if (showLedgerDialog) {
         var ledgerSearch by remember { mutableStateOf("") }
         var ledgerSearchVisible by remember { mutableStateOf(false) }
         ModalBottomSheet(onDismissRequest = { showLedgerDialog = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), dragHandle = null, containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
-            Column(Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+            Column(Modifier.fillMaxWidth().padding(bottom = AppSpacing.xxl)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xs)) {
                     IconButton(onClick = { showLedgerDialog = false }) { Icon(Icons.Filled.ArrowBack, contentDescription = "关闭") }
                     Text("账本", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     IconButton(onClick = { ledgerSearchVisible = !ledgerSearchVisible; ledgerSearch = "" }) { Icon(Icons.Filled.Search, contentDescription = "搜索") }
@@ -623,19 +626,19 @@ fun RecordScreen(
                     IconButton(onClick = { showLedgerDialog = false; Toast.makeText(context, "请在『我的-账本管理』中维护账本", Toast.LENGTH_SHORT).show() }) { Icon(Icons.Filled.Settings, contentDescription = "账本设置") }
                 }
                 if (ledgerSearchVisible) {
-                    OutlinedTextField(value = ledgerSearch, onValueChange = { ledgerSearch = it }, placeholder = { Text("搜索账本") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
-                    Spacer(Modifier.height(4.dp))
+                    OutlinedTextField(value = ledgerSearch, onValueChange = { ledgerSearch = it }, placeholder = { Text("搜索账本") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg))
+                    Spacer(Modifier.height(AppSpacing.xs))
                 }
                 ledgers.filter { ledgerSearch.isBlank() || it.name.contains(ledgerSearch) }.forEach { l ->
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onSelectLedger(l.id); showLedgerDialog = false }.padding(horizontal = 20.dp, vertical = 12.dp)) {
-                        Box(Modifier.size(width = 46.dp, height = 30.dp).clip(RoundedCornerShape(8.dp)).background(Color(l.color)))
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onSelectLedger(l.id); showLedgerDialog = false }.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.md)) {
+                        Box(Modifier.size(width = 46.dp, height = 30.dp).clip(MaterialTheme.shapes.small).background(Color(l.color)))
                         Spacer(Modifier.width(14.dp))
                         Text(l.name, style = MaterialTheme.typography.bodyLarge, fontWeight = if (l.id == selectedLedgerId) FontWeight.Bold else FontWeight.Normal, color = if (l.id == selectedLedgerId) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
-                        if (l.id == selectedLedgerId) Icon(Icons.Filled.Check, contentDescription = "当前账本", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        if (l.id == selectedLedgerId) Icon(Icons.Filled.Check, contentDescription = "当前账本", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(AppSize.iconSize))
                     }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showLedgerDialog = false; Toast.makeText(context, "请在『我的-账本管理』中添加账本", Toast.LENGTH_SHORT).show() }.padding(horizontal = 20.dp, vertical = 14.dp)) {
-                    Icon(Icons.Filled.AddCircle, contentDescription = "添加账本", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showLedgerDialog = false; Toast.makeText(context, "请在『我的-账本管理』中添加账本", Toast.LENGTH_SHORT).show() }.padding(horizontal = AppSpacing.xl, vertical = 14.dp)) {
+                    Icon(Icons.Filled.AddCircle, contentDescription = "添加账本", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(AppSize.iconLarge))
                     Spacer(Modifier.width(14.dp))
                     Text("添加账本", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
                 }
@@ -662,7 +665,7 @@ fun RecordScreen(
             Row(Modifier.fillMaxWidth()) {
                 listOf("手续费" to false, "补贴" to true).forEach { (label, tab) ->
                     Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(label, style = MaterialTheme.typography.titleMedium, fontWeight = if (feeTab == tab) FontWeight.Bold else FontWeight.Normal, color = if (feeTab == tab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.clickable { feeTab = tab; feeInput = "" }.padding(vertical = 8.dp))
+                        Text(label, style = MaterialTheme.typography.titleMedium, fontWeight = if (feeTab == tab) FontWeight.Bold else FontWeight.Normal, color = if (feeTab == tab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.clickable { feeTab = tab; feeInput = "" }.padding(vertical = AppSpacing.sm))
                         Box(Modifier.fillMaxWidth().height(2.dp).background(if (feeTab == tab) MaterialTheme.colorScheme.primary else Color.Transparent))
                     }
                 }
@@ -682,9 +685,9 @@ fun RecordScreen(
                     }
                 }
                 OutlinedTextField(value = feeInput, onValueChange = { feeInput = it }, label = { Text(if (feeByRate) "请输入费率(%)" else "请输入金额") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm), modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
                     listOf("输入金额" to false, "输入费率" to true).forEach { (label, mode) ->
-                        Box(Modifier.clip(RoundedCornerShape(16.dp)).background(if (feeByRate == mode) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.surfaceVariant).clickable { feeByRate = mode; feeInput = "" }.padding(horizontal = 14.dp, vertical = 8.dp)) {
+                        Box(Modifier.clip(MaterialTheme.shapes.large).background(if (feeByRate == mode) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.surfaceVariant).clickable { feeByRate = mode; feeInput = "" }.padding(horizontal = 14.dp, vertical = AppSpacing.sm)) {
                             Text(label, style = MaterialTheme.typography.labelLarge, color = if (feeByRate == mode) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
@@ -712,7 +715,7 @@ fun RecordScreen(
     }
     if (showImageSourceDialog) {
         ModalBottomSheet(onDismissRequest = { showImageSourceDialog = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), dragHandle = null, containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
-            Column(Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+            Column(Modifier.fillMaxWidth().padding(bottom = AppSpacing.lg)) {
                 Text("拍照", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clickable {
                     showImageSourceDialog = false
                     runCatching {
@@ -722,11 +725,11 @@ fun RecordScreen(
                         cameraUri = uri
                         cameraLauncher.launch(uri)
                     }
-                }.padding(horizontal = 24.dp, vertical = 18.dp))
+                }.padding(horizontal = AppSpacing.xxl, vertical = 18.dp))
                 Text("从相册中选择", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clickable {
                     showImageSourceDialog = false
                     imagePicker.launch(android.content.Intent(android.content.Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI))
-                }.padding(horizontal = 24.dp, vertical = 18.dp))
+                }.padding(horizontal = AppSpacing.xxl, vertical = 18.dp))
             }
         }
     }
@@ -744,7 +747,7 @@ fun RecordScreen(
         val shownChildren = if (searchQuery.isBlank()) childOrder else childOrder.filter { it.name.contains(searchQuery) }
         ModalBottomSheet(onDismissRequest = { showCategoryDialog = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxWidth().height(560.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xs)) {
                     IconButton(onClick = { showCategoryDialog = false }) { Icon(Icons.Filled.ArrowBack, contentDescription = "关闭") }
                     Text(if (selectedType == TransactionType.EXPENSE) "支出" else "收入", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     IconButton(onClick = { searchVisible = !searchVisible; if (!searchVisible) searchQuery = "" }) { Icon(Icons.Filled.Search, contentDescription = "搜索") }
@@ -752,8 +755,8 @@ fun RecordScreen(
                     IconButton(onClick = { Toast.makeText(context, "请在抽屉-分类管理中维护分类", Toast.LENGTH_SHORT).show() }) { Icon(Icons.Filled.Settings, contentDescription = "分类设置") }
                 }
                 if (searchVisible) {
-                    OutlinedTextField(value = searchQuery, onValueChange = { searchQuery = it }, placeholder = { Text("搜索分类") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
-                    Spacer(Modifier.height(4.dp))
+                    OutlinedTextField(value = searchQuery, onValueChange = { searchQuery = it }, placeholder = { Text("搜索分类") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg))
+                    Spacer(Modifier.height(AppSpacing.xs))
                 }
                 Row(modifier = Modifier.weight(1f)) {
                     // 左列：大类（可拖动）
@@ -769,15 +772,15 @@ fun RecordScreen(
                             items(shownParents, key = { it.id }) { p ->
                                 ReorderableItem(reorderState, key = p.id) { dragging ->
                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(10.dp)).background(if (selectedParentId == p.id || dragging) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent).zIndex(if (dragging) 1f else 0f).longPressDraggableHandle().clickable { selectedParentId = p.id; searchQuery = ""; if (categories.none { it.parentId == p.id }) { categoryId = p.id; catChosenManually = true; showCategoryDialog = false } }) {
-                                        Box(modifier = Modifier.width(3.dp).height(20.dp).background(if (selectedParentId == p.id) MaterialTheme.colorScheme.primary else Color.Transparent))
-                                        Text(p.name, style = MaterialTheme.typography.bodyMedium, fontWeight = if (selectedParentId == p.id) FontWeight.Bold else FontWeight.Normal, color = if (selectedParentId == p.id) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, maxLines = 1, modifier = Modifier.padding(start = 8.dp))
+                                        Box(modifier = Modifier.width(3.dp).height(AppSpacing.xl).background(if (selectedParentId == p.id) MaterialTheme.colorScheme.primary else Color.Transparent))
+                                        Text(p.name, style = MaterialTheme.typography.bodyMedium, fontWeight = if (selectedParentId == p.id) FontWeight.Bold else FontWeight.Normal, color = if (selectedParentId == p.id) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, maxLines = 1, modifier = Modifier.padding(start = AppSpacing.sm))
                                     }
                                 }
                             }
                             item {
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(52.dp).clickable { addParentMode = true; newCatName = ""; showAddDialog = true }.padding(start = 12.dp)) {
-                                    Icon(Icons.Filled.AddCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                                    Spacer(Modifier.width(4.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(52.dp).clickable { addParentMode = true; newCatName = ""; showAddDialog = true }.padding(start = AppSpacing.md)) {
+                                    Icon(Icons.Filled.AddCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(AppSize.iconSize))
+                                    Spacer(Modifier.width(AppSpacing.xs))
                                     Text("大类", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
                                 }
                             }
@@ -798,9 +801,9 @@ fun RecordScreen(
                             LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                                 items(shownChildren, key = { it.id }) { c ->
                                     ReorderableItem(reorderState, key = c.id) { dragging ->
-                                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(10.dp)).background(if (dragging) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent).zIndex(if (dragging) 1f else 0f).longPressDraggableHandle().clickable { categoryId = c.id; catChosenManually = true; showCategoryDialog = false }.padding(start = 16.dp)) {
+                                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(10.dp)).background(if (dragging) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent).zIndex(if (dragging) 1f else 0f).longPressDraggableHandle().clickable { categoryId = c.id; catChosenManually = true; showCategoryDialog = false }.padding(start = AppSpacing.lg)) {
                                             CategoryIcon(c.icon, size = 34.dp, fontSize = 18.sp, selected = categoryId == c.id, fallbackContainer = SemanticColors.ExpenseRed.copy(alpha = 0.08f))
-                                            Spacer(Modifier.width(12.dp))
+                                            Spacer(Modifier.width(AppSpacing.md))
                                             Text(c.name, style = MaterialTheme.typography.bodyLarge, color = if (categoryId == c.id) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, fontWeight = if (categoryId == c.id) FontWeight.Bold else FontWeight.Normal, maxLines = 1)
                                         }
                                     }
@@ -980,13 +983,13 @@ fun RecordScreen(
             text = {
                 Box {
                     OutlinedTextField(value = discountInput, onValueChange = { discountInput = it }, isError = invalid, trailingIcon = { if (invalid) Icon(Icons.Filled.Error, contentDescription = null, tint = MaterialTheme.colorScheme.error) }, supportingText = { Text(if (invalid) "原价不能低于实付金额" else hintText, style = MaterialTheme.typography.bodySmall, color = if (invalid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                    Text(if (discountMode) "输入原价，自动计算优惠金额" else "请输入优惠金额", style = MaterialTheme.typography.bodySmall, color = if (invalid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, modifier = Modifier.align(Alignment.TopStart).offset(x = 12.dp, y = (-8).dp).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(horizontal = 4.dp))
+                    Text(if (discountMode) "输入原价，自动计算优惠金额" else "请输入优惠金额", style = MaterialTheme.typography.bodySmall, color = if (invalid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, modifier = Modifier.align(Alignment.TopStart).offset(x = AppSpacing.md, y = (-8).dp).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(horizontal = AppSpacing.xs))
                 }
             },
             dismissButton = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TextButton(onClick = { discountMode = !discountMode; discountInput = "" }) { Text("切换") }
-                    Spacer(Modifier.width(12.dp))
+                    Spacer(Modifier.width(AppSpacing.md))
                     TextButton(onClick = { showDiscountDialog = false }) { Text("取消") }
                 }
             },
@@ -1007,13 +1010,13 @@ fun RecordScreen(
             title = { Text("统计设置") },
             text = {
                 Column {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { include = !include }.padding(vertical = 8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { include = !include }.padding(vertical = AppSpacing.sm)) {
                         Checkbox(checked = !include, onCheckedChange = { include = it != true })
-                        Text("不计入收支", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 8.dp))
+                        Text("不计入收支", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = AppSpacing.sm))
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { includeBudget = !includeBudget }.padding(vertical = 8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { includeBudget = !includeBudget }.padding(vertical = AppSpacing.sm)) {
                         Checkbox(checked = !includeBudget, onCheckedChange = { includeBudget = it != true })
-                        Text("不计入预算", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 8.dp))
+                        Text("不计入预算", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = AppSpacing.sm))
                     }
                 }
             },
@@ -1045,14 +1048,14 @@ private fun TypeTab(modifier: Modifier, t: TransactionType, selectedType: Transa
     val selected = selectedType == t
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.clickable { onTypeChange(t) }) {
         Text(when (t) { TransactionType.EXPENSE -> "支出"; TransactionType.INCOME -> "收入"; TransactionType.TRANSFER -> "转账"; TransactionType.LOAN -> "借贷" }, style = MaterialTheme.typography.titleMedium, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(AppSpacing.xs))
         Spacer(Modifier.size(width = 48.dp, height = 3.dp).clip(RoundedCornerShape(2.dp)).background(if (selected) MaterialTheme.colorScheme.primary else Color.Transparent))
         Spacer(Modifier.height(2.dp))
     }
 }
 @Composable
 private fun TextChip(text: String, selected: Boolean, modifier: Modifier = Modifier, annotated: AnnotatedString? = null, containerColor: Color? = null, onClick: () -> Unit) {
-    Box(modifier = modifier.clip(RoundedCornerShape(20.dp)).background(containerColor ?: if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant).clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 9.dp), contentAlignment = Alignment.Center) {
+    Box(modifier = modifier.clip(MaterialTheme.shapes.extraLarge).background(containerColor ?: if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant).clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 9.dp), contentAlignment = Alignment.Center) {
         Text(annotated ?: AnnotatedString(text), style = MaterialTheme.typography.bodyMedium, color = if (annotated != null) Color.Unspecified else if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
     }
 }
@@ -1066,7 +1069,7 @@ private fun AccountPickerSheet(accounts: List<AccountDomain>, currentId: Long, o
     var query by remember { mutableStateOf("") }
     var menu by remember { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xs)) {
             IconButton(onClick = onDismiss) { Icon(Icons.Filled.ArrowBack, "返回") }
             Text("账户", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
             IconButton(onClick = { search = !search; if (!search) query = "" }) { Icon(Icons.Filled.Search, "搜索") }
@@ -1076,30 +1079,30 @@ private fun AccountPickerSheet(accounts: List<AccountDomain>, currentId: Long, o
             }
         }
         if (search) {
-            OutlinedTextField(value = query, onValueChange = { query = it }, placeholder = { Text("搜索账户") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+            OutlinedTextField(value = query, onValueChange = { query = it }, placeholder = { Text("搜索账户") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg))
         }
-        Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-            FilterChip(selected = tab == 0, onClick = { tab = 0 }, label = { Text("单选") }, modifier = Modifier.padding(end = 8.dp))
+        Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)) {
+            FilterChip(selected = tab == 0, onClick = { tab = 0 }, label = { Text("单选") }, modifier = Modifier.padding(end = AppSpacing.sm))
             FilterChip(selected = tab == 1, onClick = { tab = 1 }, label = { Text("组合") })
         }
         if (tab == 1) {
-            Text("组合账户暂不支持记账选择，请在「单选」模式下选择账户", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp))
+            Text("组合账户暂不支持记账选择，请在「单选」模式下选择账户", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.xxxl))
         } else {
             val filtered = accounts.filter { query.isBlank() || it.name.contains(query) }
             val groups = listOf(AccountType.CASH to "现金", AccountType.BANK to "储蓄卡", AccountType.WECHAT to "微信钱包", AccountType.ALIPAY to "支付宝", AccountType.OTHER to "其他")
-            LazyColumn(Modifier.fillMaxWidth().padding(horizontal = 8.dp).heightIn(max = 480.dp)) {
+            LazyColumn(Modifier.fillMaxWidth().padding(horizontal = AppSpacing.sm).heightIn(max = 480.dp)) {
                 groups.forEach { (type, label) ->
                     val list = filtered.filter { it.type == type }
                     if (list.isNotEmpty()) {
                         item(key = "g-${type.name}") {
                             var expand by remember { mutableStateOf(true) }
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { expand = !expand }.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { expand = !expand }.padding(horizontal = AppSpacing.md, vertical = 10.dp)) {
                                 Text(label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
                                 Text(if (expand) "⌄" else "›", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             if (!expand) return@item
                             list.forEach { a ->
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(if (a.id == currentId) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent).clickable { onPick(a.id) }.padding(horizontal = 12.dp, vertical = 12.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(if (a.id == currentId) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent).clickable { onPick(a.id) }.padding(horizontal = AppSpacing.md, vertical = AppSpacing.md)) {
                                     Box(Modifier.size(28.dp).background(Color(a.color), CircleShape), contentAlignment = Alignment.Center) { Text(typeEmoji(type), style = MaterialTheme.typography.bodySmall) }
                                     Spacer(Modifier.width(10.dp))
                                     Row(verticalAlignment = Alignment.Bottom) {
@@ -1113,7 +1116,7 @@ private fun AccountPickerSheet(accounts: List<AccountDomain>, currentId: Long, o
                         }
                     }
                 }
-                item { Spacer(Modifier.height(24.dp)) }
+                item { Spacer(Modifier.height(AppSpacing.xxl)) }
             }
         }
     }
@@ -1134,7 +1137,7 @@ private fun NoteSheet(note: String, selectedType: com.example.jizhangruanjian.da
     val focus = remember { FocusRequester() }
     val submitOrDismiss = { if (text.value.text.isNotBlank()) onDone(text.value.text.trim()) else onDismiss() }
     ModalBottomSheet(onDismissRequest = submitOrDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), dragHandle = null, containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xs)) {
             IconButton(onClick = submitOrDismiss) { Icon(Icons.Filled.ArrowBack, "返回") }
             Text("备注", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
             IconButton(onClick = onOpenSettings) { Icon(Icons.Filled.Settings, "备注设置") }
@@ -1144,20 +1147,20 @@ private fun NoteSheet(note: String, selectedType: com.example.jizhangruanjian.da
             if (showHistory && (!afterInput || text.value.text.isNotBlank())) addAll(history.filter { it.first == selectedType }.map { it.second }.filter { text.value.text.isBlank() || it.contains(text.value.text) }.filter { it !in this })
         }
         
-        if (options.isNotEmpty()) LazyColumn(Modifier.fillMaxWidth().padding(horizontal = 12.dp).heightIn(max = 200.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh)) {
+        if (options.isNotEmpty()) LazyColumn(Modifier.fillMaxWidth().padding(horizontal = AppSpacing.md).heightIn(max = 200.dp).clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.surfaceContainerHigh)) {
             items(options.size) { i ->
                 val c = options[i]
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onDone(c) }.padding(horizontal = 20.dp, vertical = 16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onDone(c) }.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.lg)) {
                     Text(c, style = MaterialTheme.typography.bodyLarge, maxLines = 1)
                 }
             }
         }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm)) {
             BasicTextField(value = text.value, onValueChange = { text.value = it; onNoteChanged(it.text) }, textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface), cursorBrush = SolidColor(MaterialTheme.colorScheme.primary), modifier = Modifier.weight(1f).focusRequester(focus), decorationBox = { inner -> if (text.value.text.isEmpty()) Text("备注...", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant); inner() })
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(AppSpacing.md))
             Box(Modifier.size(44.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape).clickable { onDone(text.value.text.trim()) }, contentAlignment = Alignment.Center) { Icon(Icons.Filled.Check, "确定", tint = MaterialTheme.colorScheme.primary) }
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(AppSpacing.lg))
     }
     LaunchedEffect(Unit) { focus.requestFocus() }
 }
@@ -1198,23 +1201,23 @@ private fun CurrencyScreen(currentAmountText: String, currency: String, onAmount
     var showKeypad by remember { mutableStateOf(false) }
     var showPick by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState())) {
-        IconButton(onClick = onBack, modifier = Modifier.padding(start = 4.dp, top = 4.dp)) { Icon(Icons.Filled.ArrowBack, contentDescription = "返回") }
-        Text("明细币种", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 20.dp))
-        Spacer(Modifier.height(24.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showKeypad = true }.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        IconButton(onClick = onBack, modifier = Modifier.padding(start = AppSpacing.xs, top = AppSpacing.xs)) { Icon(Icons.Filled.ArrowBack, contentDescription = "返回") }
+        Text("明细币种", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = AppSpacing.xl))
+        Spacer(Modifier.height(AppSpacing.xxl))
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showKeypad = true }.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.lg)) {
             Text("金额", style = MaterialTheme.typography.bodyLarge)
             Spacer(Modifier.weight(1f))
             Text(currentAmountText.ifBlank { "0.00" }, style = MaterialTheme.typography.bodyLarge)
             Text(" ›", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showPick = true }.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showPick = true }.padding(horizontal = AppSpacing.xl, vertical = AppSpacing.lg)) {
             Text("币种", style = MaterialTheme.typography.bodyLarge)
             Spacer(Modifier.weight(1f))
             Text(currencyOptions.firstOrNull { it.first == currency }?.second ?: currency, style = MaterialTheme.typography.bodyLarge)
             Text(" ›", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Spacer(Modifier.height(24.dp))
-        Button(onClick = onBack, shape = RoundedCornerShape(26.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary), modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(52.dp)) { Text("确定", style = MaterialTheme.typography.titleMedium) }
+        Spacer(Modifier.height(AppSpacing.xxl))
+        AppButton(text = "确定", onClick = onBack, variant = AppButtonVariant.Primary, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xl))
     }
     if (showKeypad) {
         var draft by remember { mutableStateOf(currentAmountText) }
@@ -1224,8 +1227,8 @@ private fun CurrencyScreen(currentAmountText: String, currency: String, onAmount
         var baseExpr by remember { mutableStateOf("") }
         ModalBottomSheet(onDismissRequest = { showKeypad = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), dragHandle = null) {
             Column {
-                Box(Modifier.fillMaxWidth().padding(vertical = 10.dp), contentAlignment = Alignment.Center) { Box(Modifier.width(40.dp).height(4.dp).clip(RoundedCornerShape(2.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) }
-                Text(draft.ifBlank { "0.00" }, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), textAlign = TextAlign.End)
+                Box(Modifier.fillMaxWidth().padding(vertical = 10.dp), contentAlignment = Alignment.Center) { Box(Modifier.width(40.dp).height(AppSpacing.xs).clip(RoundedCornerShape(2.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) }
+                Text(draft.ifBlank { "0.00" }, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm), textAlign = TextAlign.End)
                 NumericKeypad(onKey = { k -> if (k.isNotEmpty()) draft = KeypadCalculator.digest(draft, k) }, onAction = { a ->
                     when (a) {
                         KeypadAction.DELETE -> draft = KeypadCalculator.deleteLast(draft)
@@ -1233,7 +1236,7 @@ private fun CurrencyScreen(currentAmountText: String, currency: String, onAmount
                         KeypadAction.TOGGLE_CALCULATOR -> if (!calcMode) { baseExpr = draft; calcMode = true } else { draft = baseExpr; calcMode = false }
                         KeypadAction.APPLY -> { KeypadCalculator.toCents(draft).takeIf { it > 0L }?.let { draft = Formatters.yuanText(it) }; calcMode = false }
                     }
-                }, isCalculatorMode = calcMode, displayText = draft.ifBlank { "0.00" }, modifier = Modifier.fillMaxWidth().padding(12.dp), hapticEnabled = prefs["rp_haptic"] != "0", reversed = prefs["rp_reverse"] == "1", keySize = keypadKeySize(prefs))
+                }, isCalculatorMode = calcMode, displayText = draft.ifBlank { "0.00" }, modifier = Modifier.fillMaxWidth().padding(AppSpacing.md), hapticEnabled = prefs["rp_haptic"] != "0", reversed = prefs["rp_reverse"] == "1", keySize = keypadKeySize(prefs))
             }
         }
     }
@@ -1242,7 +1245,7 @@ private fun CurrencyScreen(currentAmountText: String, currency: String, onAmount
         AlertDialog(onDismissRequest = { showPick = false }, title = { Text("选择币种") }, text = {
             Column {
                 currencyOptions.forEach { (code, name) ->
-                    Text("$name $code", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clickable { onCurrencyChange(code); showPick = false }.padding(vertical = 12.dp))
+                    Text("$name $code", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.fillMaxWidth().clickable { onCurrencyChange(code); showPick = false }.padding(vertical = AppSpacing.md))
                 }
             }
         }, dismissButton = { TextButton(onClick = { Toast.makeText(context, "币种管理暂未开放", Toast.LENGTH_SHORT).show() }) { Text("币种管理") } }, confirmButton = { TextButton(onClick = { showPick = false }) { Text("取消") } })
@@ -1273,45 +1276,45 @@ private fun RefundPage(accounts: List<AccountDomain>, initialAmount: String, max
             IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, contentDescription = "返回") }
             Text("退款", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)) {
             Text("退款金额", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(draft.ifBlank { "0.00" }, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold, color = if (overLimit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
             if (overLimit) Text("退款金额不能超过明细金额", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
         }
-        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)).clickable { showAccount = true }.padding(horizontal = 16.dp, vertical = 14.dp)) {
+        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = AppSpacing.md)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)).clickable { showAccount = true }.padding(horizontal = AppSpacing.lg, vertical = 14.dp)) {
                 Text("转入账户", style = MaterialTheme.typography.bodyLarge)
                 Spacer(Modifier.weight(1f))
                 Text(accounts.firstOrNull { it.id == currentAccountId }?.name ?: "", style = MaterialTheme.typography.bodyLarge)
                 Text(" ›", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Spacer(Modifier.height(8.dp))
-            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showDate = true }.padding(horizontal = 16.dp, vertical = 14.dp)) {
+            Spacer(Modifier.height(AppSpacing.sm))
+            Column(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showDate = true }.padding(horizontal = AppSpacing.lg, vertical = 14.dp)) {
                     Text("退款日期", style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.weight(1f))
                     Text(String.format(java.util.Locale.CHINA, "%tF", refundDate), style = MaterialTheme.typography.bodyLarge)
                     Text(" ›", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showTime = true }.padding(horizontal = 16.dp, vertical = 14.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showTime = true }.padding(horizontal = AppSpacing.lg, vertical = 14.dp)) {
                     Text("退款时间", style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.weight(1f))
                     Text(String.format(java.util.Locale.CHINA, "%tR", refundDate), style = MaterialTheme.typography.bodyLarge)
                     Text(" ›", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showNote = true }.padding(horizontal = 16.dp, vertical = 14.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { showNote = true }.padding(horizontal = AppSpacing.lg, vertical = 14.dp)) {
                     Text("备注", style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.weight(1f))
                     Text(note, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(" ›", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = AppSpacing.sm)) {
                 Checkbox(checked = lockAccount, onCheckedChange = { onLockChange(it) })
                 Text("锁定退款转入账户", style = MaterialTheme.typography.bodyLarge)
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(AppSpacing.xs))
                 Box(Modifier.size(18.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant).clickable { showLockHelp = true }, contentAlignment = Alignment.Center) {
                     Text("?", fontSize = 11.sp, lineHeight = 11.sp, style = LocalTextStyle.current.copy(platformStyle = PlatformTextStyle(includeFontPadding = false)), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -1334,11 +1337,11 @@ private fun RefundPage(accounts: List<AccountDomain>, initialAmount: String, max
                 KeypadAction.TOGGLE_CALCULATOR -> if (!calcMode) { baseExpr = draft; calcMode = true } else { draft = baseExpr; calcMode = false }
                 KeypadAction.APPLY -> { KeypadCalculator.toCents(draft).takeIf { it > 0L }?.let { draft = Formatters.yuanText(it) }; calcMode = false }
             }
-        }, isCalculatorMode = calcMode, displayText = draft.ifBlank { "0.00" }, secondaryLabel = "清空", modifier = Modifier.fillMaxWidth().padding(12.dp), hapticEnabled = prefs["rp_haptic"] != "0", reversed = prefs["rp_reverse"] == "1", keySize = keypadKeySize(prefs))
+        }, isCalculatorMode = calcMode, displayText = draft.ifBlank { "0.00" }, secondaryLabel = "清空", modifier = Modifier.fillMaxWidth().padding(AppSpacing.md), hapticEnabled = prefs["rp_haptic"] != "0", reversed = prefs["rp_reverse"] == "1", keySize = keypadKeySize(prefs))
     }
     toastHint?.let {
-        Surface(shape = RoundedCornerShape(20.dp), color = Color.Black.copy(alpha = 0.75f), modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 240.dp)) {
-            Text(it, color = Color.White, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp))
+        Surface(shape = MaterialTheme.shapes.extraLarge, color = Color.Black.copy(alpha = 0.75f), modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 240.dp)) {
+            Text(it, color = Color.White, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = AppSpacing.xl, vertical = 10.dp))
         }
     }
     }
@@ -1346,7 +1349,7 @@ private fun RefundPage(accounts: List<AccountDomain>, initialAmount: String, max
         AlertDialog(onDismissRequest = { showAccount = false }, title = { Text("转入账户") }, text = {
             Column {
                 accounts.forEach { acc ->
-                    Text(acc.name, style = MaterialTheme.typography.bodyLarge, color = if (acc.id == currentAccountId) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth().clickable { onPickAccount(acc.id); showAccount = false }.padding(vertical = 12.dp))
+                    Text(acc.name, style = MaterialTheme.typography.bodyLarge, color = if (acc.id == currentAccountId) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth().clickable { onPickAccount(acc.id); showAccount = false }.padding(vertical = AppSpacing.md))
                 }
             }
         }, confirmButton = { TextButton(onClick = { showAccount = false }) { Text("取消") } })
@@ -1391,17 +1394,17 @@ private fun RefundPage(accounts: List<AccountDomain>, initialAmount: String, max
         val text = remember { mutableStateOf("") }
         val focus = remember { FocusRequester() }
         ModalBottomSheet(onDismissRequest = { showNote = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), dragHandle = null, containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xs)) {
                 IconButton(onClick = { showNote = false }) { Icon(Icons.Filled.ArrowBack, "返回") }
                 Text("备注", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
                 IconButton(onClick = { showNote = false; onOpenNoteSettings() }) { Icon(Icons.Filled.Settings, "备注设置") }
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm)) {
                 BasicTextField(value = text.value, onValueChange = { text.value = it }, textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface), cursorBrush = SolidColor(MaterialTheme.colorScheme.primary), modifier = Modifier.weight(1f).focusRequester(focus), decorationBox = { inner -> if (text.value.isEmpty()) Text("备注...", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant); inner() })
-                Spacer(Modifier.width(12.dp))
+                Spacer(Modifier.width(AppSpacing.md))
                 Box(Modifier.size(44.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape).clickable { onNoteChange(text.value.trim()); showNote = false }, contentAlignment = Alignment.Center) { Icon(Icons.Filled.Check, "确定", tint = MaterialTheme.colorScheme.primary) }
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(AppSpacing.lg))
         }
         LaunchedEffect(Unit) { focus.requestFocus() }
     }

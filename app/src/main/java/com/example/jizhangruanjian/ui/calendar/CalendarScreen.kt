@@ -81,6 +81,9 @@ import com.example.jizhangruanjian.data.model.TransactionType
 import com.example.jizhangruanjian.domain.model.TransactionDisplay
 import com.example.jizhangruanjian.ui.components.CategoryIcon
 import com.example.jizhangruanjian.ui.components.ImageViewer
+import com.example.jizhangruanjian.ui.components.AppButton
+import com.example.jizhangruanjian.ui.components.AppButtonVariant
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
@@ -125,7 +128,7 @@ fun CalendarScreen(viewModel: CalendarViewModel = hiltViewModel(), onBack: () ->
     val lossC = Color(config.calendarLossColor)
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
         // 整页统一滚动：顶部栏、日历、筛选与当日明细作为一个整体
-        Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(horizontal = 12.dp).verticalScroll(rememberScrollState())) {
+        Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(horizontal = AppSpacing.md).verticalScroll(rememberScrollState())) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
                 IconButton(onClick = viewModel::prevMonth) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "上月") }
@@ -138,7 +141,7 @@ fun CalendarScreen(viewModel: CalendarViewModel = hiltViewModel(), onBack: () ->
             val monthCells = cells.values
             val mIncome = monthCells.sumOf { it.income }
             val mExpense = monthCells.sumOf { it.expense }
-            Text("收入 ${Formatters.yuanText(mIncome)}  支出 ${Formatters.yuanText(mExpense)}  结余 ${Formatters.yuanText(mIncome - mExpense)}", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
+            Text("收入 ${Formatters.yuanText(mIncome)}  支出 ${Formatters.yuanText(mExpense)}  结余 ${Formatters.yuanText(mIncome - mExpense)}", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm))
             val dayNames = listOf("日", "一", "二", "三", "四", "五", "六")
             val weekLabels = (0..6).map { i -> dayNames[(weekStart + i) % 7] }
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -146,7 +149,7 @@ fun CalendarScreen(viewModel: CalendarViewModel = hiltViewModel(), onBack: () ->
                     Text(w, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
                 }
             }
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(AppSpacing.xs))
             val today = LocalDate.now()
             val leading = (month.atDay(1).dayOfWeek.value % 7 + 7 - weekStart) % 7
             val daysInMonth = month.lengthOfMonth()
@@ -161,8 +164,8 @@ fun CalendarScreen(viewModel: CalendarViewModel = hiltViewModel(), onBack: () ->
                     repeat(7 - week.size) { Spacer(modifier = Modifier.weight(1f)) }
                 }
             }
-            Spacer(Modifier.height(4.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.height(AppSpacing.xs))
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm, Alignment.CenterHorizontally), modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 listOf("收支", "支出", "收入", "结余").forEachIndexed { i, label ->
                     FilterChip(selected = filter == i, onClick = { viewModel.setFilter(i) }, label = { Text(label, fontSize = 13.sp) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = MaterialTheme.colorScheme.onPrimary))
                 }
@@ -170,7 +173,7 @@ fun CalendarScreen(viewModel: CalendarViewModel = hiltViewModel(), onBack: () ->
                     FilterChip(selected = false, onClick = viewModel::backToToday, label = { Text("回到本月", fontSize = 13.sp) })
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             val weekCn = listOf("周日", "周一", "周二", "周三", "周四", "周五", "周六")[selected.dayOfWeek.value % 7]
             val headText = if (selected == today) "今天 $weekCn" else "${selected.monthValue}月${selected.dayOfMonth}日 $weekCn"
             val selCell = cells[selected]
@@ -198,11 +201,11 @@ fun CalendarScreen(viewModel: CalendarViewModel = hiltViewModel(), onBack: () ->
                 else -> l.sortedByDescending { it.tradeDate }
             } }
             if (txs.isEmpty()) {
-                Text("当日无交易", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp))
+                Text("当日无交易", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.xxxl))
             } else {
                 txs.forEach { t -> CalendarTxRow(t, profitC, lossC, onViewImages = { viewerImages = it }, onClick = { onEditTransaction(t.id) }) }
             }
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(AppSpacing.xxl))
         }
     }
     viewerImages?.let { ImageViewer(images = it, onDismiss = { viewerImages = null }) }
@@ -217,16 +220,16 @@ private fun MonthPickerSheet(initial: YearMonth, onDismiss: () -> Unit, onConfir
     var y by remember { mutableStateOf(initial.year) }
     var m by remember { mutableStateOf(initial.monthValue) }
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.surface) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
-            Text("选择月份", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(vertical = 12.dp))
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xxl)) {
+            Text("选择月份", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(vertical = AppSpacing.md))
             Row(horizontalArrangement = Arrangement.spacedBy(40.dp)) {
                 WheelPicker(values = years, initialIndex = years.indexOf(initial.year), text = { "$it 年" }, onSnap = { y = years[it] })
                 WheelPicker(values = (1..12).toList(), initialIndex = initial.monthValue - 1, text = { "%02d月".format(it) }, onSnap = { m = it + 1 })
             }
-            OutlinedButton(onClick = { onToday(); onDismiss() }, modifier = Modifier.padding(vertical = 16.dp)) { Text("此刻") }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f).height(44.dp)) { Text("取消") }
-                Button(onClick = { onConfirm(YearMonth.of(y, m)); onDismiss() }, modifier = Modifier.weight(1f).height(44.dp)) { Text("确定") }
+            AppButton(text = "此刻", onClick = { onToday(); onDismiss() }, variant = AppButtonVariant.Outlined, modifier = Modifier.padding(vertical = AppSpacing.lg))
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md), modifier = Modifier.fillMaxWidth().padding(bottom = AppSpacing.xxl)) {
+                AppButton(text = "取消", onClick = onDismiss, variant = AppButtonVariant.Outlined, modifier = Modifier.weight(1f))
+                AppButton(text = "确定", onClick = { onConfirm(YearMonth.of(y, m)); onDismiss() }, variant = AppButtonVariant.Primary, modifier = Modifier.weight(1f))
             }
         }
     }
@@ -258,7 +261,7 @@ private fun DayCellView(d: LocalDate, today: LocalDate, selected: LocalDate, cel
         cell != null -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
         else -> Color.Transparent
     }
-    Column(modifier = Modifier.fillMaxSize().background(bg, RoundedCornerShape(8.dp)).border(width = if (d == today) 1.5.dp else 0.dp, color = if (d == today) MaterialTheme.colorScheme.primary else Color.Transparent, shape = RoundedCornerShape(8.dp)).clickable(onClick = onClick), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(modifier = Modifier.fillMaxSize().background(bg, MaterialTheme.shapes.small).border(width = if (d == today) 1.5.dp else 0.dp, color = if (d == today) MaterialTheme.colorScheme.primary else Color.Transparent, shape = MaterialTheme.shapes.small).clickable(onClick = onClick), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Text("${d.dayOfMonth}", fontSize = 13.sp, fontWeight = if (d == today) FontWeight.Bold else FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
         if (showLunar) Text(lunarText(d), fontSize = 7.sp, lineHeight = 8.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
         cell?.let {
@@ -286,16 +289,16 @@ private fun CalendarTxRow(t: TransactionDisplay, profitC: Color, lossC: Color, o
     val time = Formatters.timeHM(t.tradeDate)
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 10.dp)) {
         CategoryIcon(t.categoryIcon, size = 36.dp, fontSize = 16.sp)
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(AppSpacing.md))
         Column(modifier = Modifier.weight(1f)) {
             Text(t.note.ifBlank { t.categoryName }, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, maxLines = 1)
             Text(time, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (t.images.isNotEmpty()) {
                 Spacer(Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    t.images.take(3).forEach { p -> ThumbnailImage(p, Modifier.size(44.dp).clip(RoundedCornerShape(8.dp)).clickable { onViewImages(t.images) }) }
+                    t.images.take(3).forEach { p -> ThumbnailImage(p, Modifier.size(44.dp).clip(MaterialTheme.shapes.small).clickable { onViewImages(t.images) }) }
                     if (t.images.size > 3) {
-                        Box(modifier = Modifier.size(44.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant).clickable { onViewImages(t.images) }, contentAlignment = Alignment.Center) {
+                        Box(modifier = Modifier.size(44.dp).clip(MaterialTheme.shapes.small).background(MaterialTheme.colorScheme.surfaceVariant).clickable { onViewImages(t.images) }, contentAlignment = Alignment.Center) {
                             Text("+${t.images.size - 3}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
@@ -375,14 +378,14 @@ private fun AdvancedFilterDialog(viewModel: CalendarViewModel, month: YearMonth,
     val locationLabel = if (withLocation) "有位置" else "全部"
     fun buildFilter() = CalendarViewModel.AdvFilter(type = current.type, ledgerId = ledgerId, accountId = accountId, categoryId = categoryId, memberId = memberId, tagId = tagId, merchant = merchant.trim(), currency = currency, reimbursement = reimbursement, paymentStatus = paymentStatus, minAmount = minText.toDoubleOrNull()?.let { (it * 100).toLong() }, maxAmount = maxText.toDoubleOrNull()?.let { (it * 100).toLong() }, onlyWithImage = withImage, onlyRefund = onlyRefund, onlyDiscount = onlyDiscount, onlyNotInSummary = onlyNotInSummary, onlyWithLocation = withLocation, note = note.trim(), source = source, includeInBudget = includeInBudget)
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).statusBarsPadding().padding(horizontal = 16.dp)) {
+        Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).statusBarsPadding().padding(horizontal = AppSpacing.lg)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = onDismiss) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
                 Text("高级筛选", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 TextButton(onClick = { viewModel.saveAdvPreset(buildFilter()) }) { Text("存为常用", color = MaterialTheme.colorScheme.primary) }
             }
             Column(modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
-                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f), RoundedCornerShape(12.dp)).padding(12.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f), MaterialTheme.shapes.medium).padding(AppSpacing.md)) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Text("金额区间", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                         OutlinedTextField(value = minText, onValueChange = { minText = it }, placeholder = { Text("最低金额", fontSize = 13.sp) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.width(110.dp))
@@ -391,8 +394,8 @@ private fun AdvancedFilterDialog(viewModel: CalendarViewModel, month: YearMonth,
                     }
                 }
                 Spacer(Modifier.height(10.dp))
-                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f), RoundedCornerShape(12.dp)).padding(horizontal = 12.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f), MaterialTheme.shapes.medium).padding(horizontal = AppSpacing.md)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm), modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.md)) {
                         FilterChip(selected = withImage, onClick = { withImage = !withImage }, label = { Text("有图片", fontSize = 13.sp) })
                         FilterChip(selected = onlyRefund, onClick = { onlyRefund = !onlyRefund }, label = { Text("有退款", fontSize = 13.sp) })
                         FilterChip(selected = onlyDiscount, onClick = { onlyDiscount = !onlyDiscount }, label = { Text("有优惠", fontSize = 13.sp) })
@@ -400,7 +403,7 @@ private fun AdvancedFilterDialog(viewModel: CalendarViewModel, month: YearMonth,
                     }
                 }
                 Spacer(Modifier.height(10.dp))
-                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f), RoundedCornerShape(12.dp)).padding(horizontal = 12.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f), MaterialTheme.shapes.medium).padding(horizontal = AppSpacing.md)) {
                     Box {
                         FilterRow("账本", ledgerLabel, onClick = { ledgerMenu = true })
                         DropdownMenu(expanded = ledgerMenu, onDismissRequest = { ledgerMenu = false }) {
@@ -477,7 +480,7 @@ private fun AdvancedFilterDialog(viewModel: CalendarViewModel, month: YearMonth,
                     }
                 }
                 Spacer(Modifier.height(10.dp))
-                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f), RoundedCornerShape(12.dp)).padding(horizontal = 12.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f), MaterialTheme.shapes.medium).padding(horizontal = AppSpacing.md)) {
                     Box {
                         FilterRow("明细来源", sourceLabel, onClick = { sourceMenu = true })
                         DropdownMenu(expanded = sourceMenu, onDismissRequest = { sourceMenu = false }) {
@@ -498,16 +501,16 @@ private fun AdvancedFilterDialog(viewModel: CalendarViewModel, month: YearMonth,
                 }
                 Spacer(Modifier.height(10.dp))
                 if (hasPreset) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm), modifier = Modifier.fillMaxWidth()) {
                         AssistChip(onClick = { viewModel.applyAdvPreset() }, label = { Text("使用常用筛选") })
                         AssistChip(onClick = { viewModel.clearAdvPreset() }, label = { Text("清除常用") })
                     }
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(AppSpacing.md))
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
-                OutlinedButton(onClick = { viewModel.resetAdvFilter(); onDismiss() }, modifier = Modifier.weight(1f).height(44.dp)) { Text("重置") }
-                Button(onClick = { viewModel.setAdvFilter(buildFilter()); onDismiss() }, modifier = Modifier.weight(1f).height(44.dp)) { Text("确定") }
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md), modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.md)) {
+                AppButton(text = "重置", onClick = { viewModel.resetAdvFilter(); onDismiss() }, variant = AppButtonVariant.Outlined, modifier = Modifier.weight(1f))
+                AppButton(text = "确定", onClick = { viewModel.setAdvFilter(buildFilter()); onDismiss() }, variant = AppButtonVariant.Primary, modifier = Modifier.weight(1f))
             }
         }
     }
@@ -519,21 +522,21 @@ private fun SettingsDialog(config: HomeConfig, viewModel: CalendarViewModel, onD
         Column {
             Text("每周起始", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(6.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                 FilterChip(selected = config.calendarWeekStart == 1, onClick = { viewModel.setWeekStart(1) }, label = { Text("周一") })
                 FilterChip(selected = config.calendarWeekStart == 6, onClick = { viewModel.setWeekStart(6) }, label = { Text("周六") })
                 FilterChip(selected = config.calendarWeekStart == 0, onClick = { viewModel.setWeekStart(0) }, label = { Text("周日") })
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(AppSpacing.md))
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Text("显示农历", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                 Switch(checked = config.calendarShowLunar, onCheckedChange = { viewModel.setShowLunar(it) })
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(AppSpacing.md))
             Text("盈利颜色", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(6.dp))
             ColorPaletteRow(config.calendarProfitColor) { viewModel.setProfitColor(it) }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(AppSpacing.md))
             Text("亏损颜色", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(6.dp))
             ColorPaletteRow(config.calendarLossColor) { viewModel.setLossColor(it) }
