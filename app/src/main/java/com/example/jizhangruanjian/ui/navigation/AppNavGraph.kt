@@ -192,7 +192,14 @@ fun AppNavGraph() {
                                 onOpenCalendar = { navStack.add(NavPage.Calendar) },
                                 onOpenLedgerPicker = { navStack.add(NavPage.LedgerPicker) })
                             1 -> AccountSection(onMenuClick = { scope.launch { drawerState.open() } }, onNavigate = { route -> navStack.add(NavPage.Drawer(route)) }, onPickLedger = { navStack.add(NavPage.LedgerPicker) }, onSubPage = { accountInSub = it })
-                            else -> StatisticsScreen(onMenuClick = { scope.launch { drawerState.open() } }, onOpenLedgerPicker = { navStack.add(NavPage.LedgerPicker) })
+                            else -> {
+                                val ledgerName = recordViewModel.currentLedgerName.collectAsState().value
+                                StatisticsScreen(
+                                    onMenuClick = { scope.launch { drawerState.open() } },
+                                    onOpenLedgerPicker = { navStack.add(NavPage.LedgerPicker) },
+                                    ledgerName = ledgerName
+                                )
+                            }
                         }
                     }
                 }

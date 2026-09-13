@@ -20,10 +20,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -69,7 +70,8 @@ import java.util.Locale
 fun StatisticsScreen(
     viewModel: StatisticsViewModel = hiltViewModel(),
     onMenuClick: () -> Unit = {},
-    onOpenLedgerPicker: () -> Unit = {}
+    onOpenLedgerPicker: () -> Unit = {},
+    ledgerName: String = ""
 ) {
     val summary by viewModel.summary.collectAsState()
     val categories by viewModel.categories.collectAsState()
@@ -85,16 +87,21 @@ fun StatisticsScreen(
     var selectedPeriod by remember { mutableIntStateOf(1) } // 默认"月报"
     var selectedDay by remember { mutableStateOf<java.time.LocalDate?>(null) }
 
-    val brand = com.example.jizhangruanjian.ui.theme.ReportBrandColor
+    val brand = MaterialTheme.colorScheme.primary
     val catColors = com.example.jizhangruanjian.ui.theme.ReportCategoryPalette
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val outlineVariant = MaterialTheme.colorScheme.outlineVariant
-    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainerLow
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // ═══════════════════ ① 周期切换 + 标题栏 ═══════════════════
         ReportTopBar(
+            ledgerName = ledgerName,
+            onMenuClick = onMenuClick,
+            onOpenLedgerPicker = onOpenLedgerPicker
+        )
+        Spacer(Modifier.height(AppSpacing.sm))
+        PeriodCapsule(
             selectedPeriod = selectedPeriod,
             onPeriodChange = {
                 selectedPeriod = it
@@ -103,9 +110,7 @@ fun StatisticsScreen(
                     1 -> viewModel.setPeriod(com.example.jizhangruanjian.data.model.PeriodType.MONTH)
                     2 -> viewModel.setPeriod(com.example.jizhangruanjian.data.model.PeriodType.YEAR)
                 }
-            },
-            onMenuClick = onMenuClick,
-            onOpenLedgerPicker = onOpenLedgerPicker
+            }
         )
 
         // ═══════════════════ 可滚动内容区 ═══════════════════
@@ -274,68 +279,71 @@ fun StatisticsScreen(
 // ══════════════════════════════════════════════════════════════
 @Composable
 private fun ReportTopBar(
-    selectedPeriod: Int,
-    onPeriodChange: (Int) -> Unit,
+    ledgerName: String,
     onMenuClick: () -> Unit,
     onOpenLedgerPicker: () -> Unit
 ) {
-    val tabs = listOf("周报", "月报", "年报", "自定义")
-    val brand = com.example.jizhangruanjian.ui.theme.ReportBrandColor
-    val surfaceContainerHigh = MaterialTheme.colorScheme.surfaceContainerHigh
-
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg)) {
-        // 标题行：返回 + 标题 + 账本切换
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.xs)
+    ) {
+        IconButton(onClick = onMenuClick) {
+            Icon(Icons.Filled.Menu, contentDescription = "菜单", tint = MaterialTheme.colorScheme.onSurface)
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(top = AppSpacing.sm, bottom = AppSpacing.md)
+            modifier = Modifier.weight(1f).clickable { onOpenLedgerPicker() }
         ) {
-            IconButton(onClick = onMenuClick, modifier = Modifier.size(40.dp)) {
-                Icon(Icons.Filled.ChevronLeft, contentDescription = "返回", tint = MaterialTheme.colorScheme.onSurface)
-            }
             Text(
-                text = "收支报表",
-                style = MaterialTheme.typography.titleLarge,
+                text = ledgerName,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f).padding(start = AppSpacing.sm)
+                color = MaterialTheme.colorScheme.onSurface
             )
-            // 隐藏了"订阅设置"，仅保留账本切换图标
-            IconButton(onClick = onOpenLedgerPicker, modifier = Modifier.size(40.dp)) {
-                Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = "切换账本", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-            }
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = "切换账本", tint = MaterialTheme.colorScheme.onSurface)
         }
+        // 右侧无图标
+    }
+}
 
-        // 周期胶囊分段控件
-        Surface(
-            shape = RoundedCornerShape(50),
-            color = surfaceContainerHigh,
-            modifier = Modifier.fillMaxWidth()
+@Composable
+private fun PeriodCapsule(
+    selectedPeriod: Int,
+    onPeriodChange: (Int) -> Unit
+) {
+    val tabs = listOf("周报", "月报", "年报", "自定义")
+    val brand = MaterialTheme.colorScheme.primary
+    val surfaceContainerHigh = MaterialTheme.colorScheme.surfaceContainerHigh
+
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = surfaceContainerHigh,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(3.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(3.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                tabs.forEachIndexed { i, label ->
-                    val selected = i == selectedPeriod
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = if (selected) brand else Color.Transparent,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 3.dp)
-                            .clickable { onPeriodChange(i) }
+            tabs.forEachIndexed { i, label ->
+                val selected = i == selectedPeriod
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = if (selected) brand else Color.Transparent,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 3.dp)
+                        .clickable { onPeriodChange(i) }
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.padding(vertical = 10.dp)
                     ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.padding(vertical = 10.dp)
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.labelLarge,
-                                color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
-                            )
-                        }
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+                        )
                     }
                 }
             }
@@ -354,7 +362,7 @@ private fun MonthSwitchBar(
     onNext: () -> Unit,
     onTypeToggle: (TransactionType) -> Unit
 ) {
-    val brand = com.example.jizhangruanjian.ui.theme.ReportBrandColor
+    val brand = MaterialTheme.colorScheme.primary
     val surfaceContainerHigh = MaterialTheme.colorScheme.surfaceContainerHigh
 
     Row(
@@ -380,41 +388,37 @@ private fun MonthSwitchBar(
             }
         }
 
-        // 右侧：支出/收入胶囊切换
-        Surface(shape = RoundedCornerShape(50), color = surfaceContainerHigh) {
+        // 右侧：支出/收入紧凑胶囊
+        Surface(shape = RoundedCornerShape(12.dp), color = surfaceContainerHigh) {
             Row(
-                modifier = Modifier.padding(2.dp),
+                modifier = Modifier.padding(3.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val isExpense = expenseType == TransactionType.EXPENSE
-                // 支出选项
                 Surface(
-                    shape = RoundedCornerShape(50),
+                    shape = RoundedCornerShape(10.dp),
                     color = if (isExpense) brand else Color.Transparent,
-                    modifier = Modifier
-                        .clickable { onTypeToggle(TransactionType.EXPENSE) }
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                    modifier = Modifier.clickable { onTypeToggle(TransactionType.EXPENSE) }
                 ) {
                     Text(
                         text = "支出",
                         style = MaterialTheme.typography.labelLarge,
                         color = if (isExpense) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = if (isExpense) FontWeight.SemiBold else FontWeight.Normal
+                        fontWeight = if (isExpense) FontWeight.SemiBold else FontWeight.Normal,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
                     )
                 }
-                // 收入选项
                 Surface(
-                    shape = RoundedCornerShape(50),
+                    shape = RoundedCornerShape(10.dp),
                     color = if (!isExpense) brand else Color.Transparent,
-                    modifier = Modifier
-                        .clickable { onTypeToggle(TransactionType.INCOME) }
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                    modifier = Modifier.clickable { onTypeToggle(TransactionType.INCOME) }
                 ) {
                     Text(
                         text = "收入",
                         style = MaterialTheme.typography.labelLarge,
                         color = if (!isExpense) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = if (!isExpense) FontWeight.SemiBold else FontWeight.Normal
+                        fontWeight = if (!isExpense) FontWeight.SemiBold else FontWeight.Normal,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
                     )
                 }
             }
@@ -433,7 +437,7 @@ private fun KpiGrid(
     dailyAverage: Float,
     expenseType: TransactionType
 ) {
-    val brand = com.example.jizhangruanjian.ui.theme.ReportBrandColor
+    val brand = MaterialTheme.colorScheme.primary
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val surfaceContainerLowest = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -613,7 +617,7 @@ private fun DonutWithCenterTotal(
     emptyText: String
 ) {
     val empty = rank.isEmpty() || total <= 0L
-    val brand = com.example.jizhangruanjian.ui.theme.ReportBrandColor
+    val brand = MaterialTheme.colorScheme.primary
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -695,7 +699,7 @@ private fun CategoryRankList(
     totals: Long,
     colors: List<Color>
 ) {
-    val brand = com.example.jizhangruanjian.ui.theme.ReportBrandColor
+    val brand = MaterialTheme.colorScheme.primary
 
     rank.forEachIndexed { index, (c, cat) ->
         val pct = if (totals > 0L) c.total.toFloat() / totals else 0f
@@ -852,7 +856,7 @@ private fun MonthlyComparisonChart(
 // ══════════════════════════════════════════════════════════════
 @Composable
 private fun TransactionRankList(transactions: List<TransactionDisplay>, type: TransactionType) {
-    val brand = com.example.jizhangruanjian.ui.theme.ReportBrandColor
+    val brand = MaterialTheme.colorScheme.primary
 
     transactions.take(10).forEachIndexed { index, tx ->
         Row(

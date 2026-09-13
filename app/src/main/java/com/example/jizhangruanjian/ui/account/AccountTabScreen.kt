@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -82,8 +81,8 @@ fun AccountTabScreen(viewModel: AccountTabViewModel = hiltViewModel(), onMenuCli
     val q = query.trim()
     val filtered = if (q.isEmpty()) sortedAll else sortedAll.filter { it.name.contains(q) || it.note.contains(q) }
     val displayGroups = if (q.isEmpty()) orderedGroups else orderedGroups.filter { g -> filtered.any { it.groupId == g.id } }
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.xs)) {
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.xs)) {
             IconButton(onClick = onMenuClick) { Icon(Icons.Filled.Menu, contentDescription = "菜单") }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onPickLedger() }.padding(horizontal = AppSpacing.xs)) {
                 Text(ledgerName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
