@@ -128,14 +128,13 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), ledgerViewModel: Ledg
     var viewerImages by remember { mutableStateOf<List<String>?>(null) }
     var refreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val ledgerTint = currentLedger?.color?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
     val homeContent: @Composable () -> Unit = {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.xs)) {
                 IconButton(onClick = onMenuClick) { Icon(Icons.Filled.Menu, contentDescription = "菜单") }
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).clickable { onOpenLedgerPicker() }) {
-                    Text(currentLedger?.name ?: "账本", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = ledgerTint)
-                    Icon(Icons.Filled.ArrowDropDown, contentDescription = "切换账本", tint = ledgerTint)
+                    Text(currentLedger?.name ?: "账本", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Icon(Icons.Filled.ArrowDropDown, contentDescription = "切换账本", tint = MaterialTheme.colorScheme.onSurface)
                 }
                 IconButton(onClick = onSearch) { Icon(Icons.Filled.Search, contentDescription = "搜索") }
             }
@@ -193,7 +192,7 @@ private fun DataOverviewCard(config: HomeConfig, s: HomeSummary, todayExpense: L
     val subColor = if (config.coverTextColor == CoverTextColor.LIGHT) Color.White.copy(alpha = 0.85f) else OverlayColors.coverText.copy(alpha = 0.75f)
     val coverRes = coverResId(config.ledgerCover)
     Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        Box(modifier = Modifier.fillMaxWidth().height(160.dp).clip(MaterialTheme.shapes.large).clickable(onClick = onClick)) {
+        Box(modifier = Modifier.fillMaxWidth().height(150.dp).clip(MaterialTheme.shapes.large).clickable(onClick = onClick)) {
             if (coverRes != null) {
                 Image(painter = painterResource(id = coverRes), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
             } else {
@@ -285,9 +284,6 @@ private fun LazyListScope.recentSection(recent: List<TransactionDisplay>, onEdit
     } else {
         val grouped = recent.groupBy { dateOf(it.tradeDate) }.toSortedMap(compareByDescending { it })
         grouped.forEach { (date, list) ->
-            item(key = "date-$date") {
-                DateHeader(date, list.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount })
-            }
             items(list, key = { it.id }) { tx ->
                 DismissableTransactionItem(tx = tx, modifier = Modifier.animateItem(), onEdit = onEdit, onDelete = onDelete, onCopy = onCopy, onRecategorize = onRecategorize, onViewImages = onViewImages)
             }
@@ -306,7 +302,7 @@ private fun ModuleGap(content: @Composable () -> Unit) {
 private fun TransactionRow(tx: TransactionDisplay, onViewImages: (List<String>) -> Unit = {}) {
     val isTransfer = tx.type == TransactionType.TRANSFER
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)) {
-        CategoryIcon(tx.categoryIcon, size = 40.dp, fontSize = 20.sp)
+        CategoryIcon(tx.categoryIcon, size = 36.dp, fontSize = 18.sp)
         Spacer(Modifier.width(AppSpacing.md))
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -316,7 +312,7 @@ private fun TransactionRow(tx: TransactionDisplay, onViewImages: (List<String>) 
             }
             Spacer(Modifier.height(2.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(Formatters.mdHM(tx.tradeDate), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(Formatters.formatTrashTime(tx.tradeDate), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (tx.note.isNotBlank()) {
                     Spacer(Modifier.width(6.dp))
                     Text(tx.note, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -363,17 +359,6 @@ private fun DismissableTransactionItem(tx: TransactionDisplay, modifier: Modifie
                 DropdownMenuItem(text = { Text("删除") }, leadingIcon = { Icon(Icons.Filled.Delete, null) }, onClick = { menu = false; onDelete(tx) })
             }
         }
-    }
-}
-@Composable
-private fun DateHeader(date: LocalDate, expense: Long) {
-    val today = LocalDate.now()
-    val label = when (date) { today -> "今天"; today.minusDays(1) -> "昨天"; else -> date.format(DateTimeFormatter.ofPattern("M月d日")) }
-    val week = date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.CHINA)
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(top = AppSpacing.xs, bottom = AppSpacing.xs)) {
-        Text("$label $week", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.weight(1f))
-        if (expense > 0L) Text("支出 ${Formatters.yuanText(expense)}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 private fun dateOf(ts: Long): LocalDate = Instant.ofEpochMilli(ts).atZone(ZoneId.systemDefault()).toLocalDate()

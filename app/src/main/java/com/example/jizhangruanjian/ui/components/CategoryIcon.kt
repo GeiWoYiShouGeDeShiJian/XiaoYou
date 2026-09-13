@@ -57,13 +57,13 @@ fun CategoryIcon(
         }
         val color = if (base != null && !selected && unselectedTint != null) unselectedTint else base
         val styled = color != null
-        val model = if (styled) "file:///android_asset/cat/${icon}_${if (selected) "fill" else "line"}.svg" else "file:///android_asset/cat/$icon.svg"
+        val model = if (styled) "file:///android_asset/cat/${icon}_fill.svg" else "file:///android_asset/cat/$icon.svg"
         AsyncImage(
             model = model,
             contentDescription = null,
             imageLoader = rememberSvgLoader(),
             contentScale = ContentScale.Fit,
-            colorFilter = if (color != null) ColorFilter.tint(color) else null,
+            colorFilter = if (color != null) ColorFilter.tint(color.copy(alpha = 0.75f)) else null,
             modifier = modifier.size(size)
         )
     } else {

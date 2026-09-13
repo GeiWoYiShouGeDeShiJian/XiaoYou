@@ -84,8 +84,8 @@ fun AccountTabScreen(viewModel: AccountTabViewModel = hiltViewModel(), onMenuCli
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.xs)) {
             IconButton(onClick = onMenuClick) { Icon(Icons.Filled.Menu, contentDescription = "菜单") }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onPickLedger() }.padding(horizontal = AppSpacing.xs)) {
-                Text(ledgerName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onPickLedger() }) {
+                Text(ledgerName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
             }
             Spacer(Modifier.weight(1f))
@@ -108,7 +108,7 @@ fun AccountTabScreen(viewModel: AccountTabViewModel = hiltViewModel(), onMenuCli
         if (searchMode) {
             androidx.compose.material3.OutlinedTextField(value = query, onValueChange = { query = it }, placeholder = { Text("搜索账户") }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(horizontal = AppSpacing.md, vertical = AppSpacing.xs))
         }
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = AppSpacing.md)) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = AppSpacing.lg)) {
             Box(modifier = Modifier.fillMaxWidth().height(150.dp).clip(MaterialTheme.shapes.large).clickable { hideAmount = !hideAmount }) {
                 if (coverRes != null) {
                     Image(painter = painterResource(id = coverRes), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
