@@ -41,7 +41,12 @@ class BudgetViewModel @Inject constructor(
     fun add(categoryId: Long?, amount: Long, rollover: Boolean) {
         if (amount <= 0L) return
         viewModelScope.launch {
-            budgetDao.insert(Budget(ledgerId = ledgerId, categoryId = categoryId, period = BudgetPeriod.MONTHLY, amount = amount, startDate = System.currentTimeMillis(), rolloverMode = if (rollover) 1 else 0))
+            val existing = budgetDao.findOne(ledgerId, categoryId, BudgetPeriod.MONTHLY.name)
+            if (existing != null) {
+                budgetDao.update(existing.copy(amount = amount, rolloverMode = if (rollover) 1 else 0))
+            } else {
+                budgetDao.insert(Budget(ledgerId = ledgerId, categoryId = categoryId, period = BudgetPeriod.MONTHLY, amount = amount, startDate = System.currentTimeMillis(), rolloverMode = if (rollover) 1 else 0))
+            }
         }
     }
     fun update(id: Long, amount: Long) {

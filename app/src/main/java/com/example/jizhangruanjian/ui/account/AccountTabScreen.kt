@@ -149,7 +149,7 @@ fun AccountTabScreen(viewModel: AccountTabViewModel = hiltViewModel(), onMenuCli
 }
 @Composable
 private fun GroupCard(group: AccountGroupDomain, accounts: List<AccountDomain>, sum: Long, collapsed: Boolean, hideAmount: Boolean, showHidden: Boolean, onClick: () -> Unit, onAccount: (Long) -> Unit, onToggleHidden: (AccountDomain) -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surface)) {
+    Column(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceContainerLow)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = AppSpacing.lg, vertical = 14.dp)) {
             Text(group.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
             Text(if (hideAmount) "****" else Formatters.yuanText(sum), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)

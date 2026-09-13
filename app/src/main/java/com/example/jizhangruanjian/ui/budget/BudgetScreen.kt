@@ -1,6 +1,7 @@
 package com.example.jizhangruanjian.ui.budget
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -52,7 +54,7 @@ import com.example.jizhangruanjian.ui.components.SectionTitle
 import com.example.jizhangruanjian.ui.theme.AppSpacing
 import java.util.Locale
 @Composable
-fun BudgetScreen(onBack: () -> Unit, viewModel: BudgetViewModel = hiltViewModel()) {
+fun BudgetScreen(onBack: () -> Unit, onOpenDetail: (Long?, String) -> Unit, viewModel: BudgetViewModel = hiltViewModel()) {
     val states by viewModel.states.collectAsState()
     val total by viewModel.total.collectAsState()
     val categories by viewModel.expenseCategories.collectAsState()
@@ -62,7 +64,7 @@ fun BudgetScreen(onBack: () -> Unit, viewModel: BudgetViewModel = hiltViewModel(
     Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { AppTopBar(title = "预算", onBack = onBack, actions = { IconButton(onClick = { addDialog = true }) { Icon(Icons.Filled.Add, contentDescription = "新建预算") } }) }) { pad ->
         Column(modifier = Modifier.fillMaxSize().padding(pad).padding(horizontal = AppSpacing.lg)) {
             Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
-            total?.let { TotalBudgetCard(it, categories) }
+            total?.let { TotalBudgetCard(it, categories, onClick = { onOpenDetail(null, "总预算") }) }
             Spacer(Modifier.height(AppSpacing.md))
             Text("分类预算", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(AppSpacing.sm))
@@ -73,7 +75,7 @@ fun BudgetScreen(onBack: () -> Unit, viewModel: BudgetViewModel = hiltViewModel(
                         Text("暂无分类预算，点右上角新建", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     perCategory.forEach { s ->
-                        BudgetRow(s, categories, onEdit = { editFor = s }, onDelete = { deleteFor = s })
+                        BudgetRow(s, categories, onClick = { onOpenDetail(s.budget.categoryId, categories.firstOrNull { it.id == s.budget.categoryId }?.name ?: "分类预算") }, onEdit = { editFor = s }, onDelete = { deleteFor = s })
                     }
                 }
             }
@@ -85,8 +87,8 @@ fun BudgetScreen(onBack: () -> Unit, viewModel: BudgetViewModel = hiltViewModel(
 }
 }
 @Composable
-private fun TotalBudgetCard(s: BudgetState, categories: List<CategoryDomain>) {
-    MoneyBookCard(modifier = Modifier.fillMaxWidth()) {
+private fun TotalBudgetCard(s: BudgetState, categories: List<CategoryDomain>, onClick: () -> Unit) {
+    MoneyBookCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Column(modifier = Modifier.padding(AppSpacing.lg)) {
             SectionTitle("总预算（${monthLabel()}）")
         Spacer(Modifier.height(AppSpacing.sm))
@@ -118,9 +120,9 @@ private fun BudgetChip(label: String, value: String) {
     }
 }
 @Composable
-private fun BudgetRow(s: BudgetState, categories: List<CategoryDomain>, onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun BudgetRow(s: BudgetState, categories: List<CategoryDomain>, onClick: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
     val cat = categories.firstOrNull { it.id == s.budget.categoryId }
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.sm)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = AppSpacing.sm)) {
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CategoryIcon(cat?.icon ?: "📁", size = 22.dp, fontSize = 14.sp)
@@ -144,7 +146,7 @@ private fun BudgetFormDialog(categories: List<CategoryDomain>, onConfirm: (Long?
     var amount by remember { mutableStateOf("") }
     var rollover by remember { mutableStateOf(true) }
     AlertDialog(onDismissRequest = onDismiss, confirmButton = { TextButton(enabled = (amount.toDoubleOrNull() ?: 0.0) > 0.0, onClick = { onConfirm(if (isTotal) null else categoryId, (amount.toDoubleOrNull()!! * 100).toLong(), rollover) }) { Text("确定") } }, dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } }, title = { Text("新建预算") }, text = {
-        Column {
+        Column(modifier = Modifier.heightIn(max = 380.dp).verticalScroll(rememberScrollState())) {
             Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                 FilterChip(selected = isTotal, onClick = { isTotal = true; categoryId = null }, label = { Text("总预算") })
                 FilterChip(selected = !isTotal, onClick = { isTotal = false }, label = { Text("分类预算") })

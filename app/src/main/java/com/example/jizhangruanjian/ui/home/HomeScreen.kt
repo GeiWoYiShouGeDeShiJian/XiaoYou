@@ -354,7 +354,7 @@ private fun DismissableTransactionItem(tx: TransactionDisplay, modifier: Modifie
         }
     }) {
         var menu by remember(tx.id) { mutableStateOf(false) }
-        Box(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surface).combinedClickable(onClick = { onEdit(tx) }, onLongClick = { menu = true }).padding(horizontal = AppSpacing.md, vertical = 6.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceContainerLow).combinedClickable(onClick = { onEdit(tx) }, onLongClick = { menu = true }).padding(horizontal = AppSpacing.md, vertical = 6.dp)) {
             TransactionRow(tx, onViewImages)
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 DropdownMenuItem(text = { Text("编辑") }, leadingIcon = { Icon(Icons.Filled.Edit, null) }, onClick = { menu = false; onEdit(tx) })

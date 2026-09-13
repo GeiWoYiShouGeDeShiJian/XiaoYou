@@ -67,7 +67,7 @@ import kotlinx.coroutines.launch
 private sealed interface NavPage {
     data class Drawer(val route: String, val fromDrawer: Boolean = false) : NavPage
     data object Budget : NavPage
-    data object BudgetDetail : NavPage
+    data class BudgetDetail(val categoryId: Long?, val title: String) : NavPage
     data object CustomizeHome : NavPage
     data object Calendar : NavPage
     data object MonthDetail : NavPage
@@ -168,8 +168,11 @@ fun AppNavGraph() {
                     is NavPage.CustomizeHome -> CustomizeHomeScreen(onBack = { pop() })
                     is NavPage.Calendar -> CalendarScreen(viewModel = calendarViewModel, onBack = { pop() }, onEditTransaction = { recordViewModel.startEdit(it) })
                     is NavPage.MonthDetail -> com.example.jizhangruanjian.ui.detail.MonthDetailScreen(onBack = { pop() }, onSearch = { navStack.add(NavPage.Drawer(DrawerRoutes.SEARCH)) }, onEdit = { recordViewModel.startEdit(it) }, onCopy = { recordViewModel.copy(it) }, onDelete = { recordViewModel.delete(it) }, onAddRecord = { showRecord = true })
-                    is NavPage.BudgetDetail -> BudgetDetailScreen(viewModel = budgetDetailViewModel, onBack = { pop() }, onOpenManage = { navStack.removeLastOrNull(); navStack.add(NavPage.Budget) }, onEditTransaction = { recordViewModel.startEdit(it) })
-                    is NavPage.Budget -> BudgetScreen(onBack = { pop() })
+                    is NavPage.BudgetDetail -> {
+                        LaunchedEffect(top.categoryId) { budgetDetailViewModel.setCategory(top.categoryId) }
+                        BudgetDetailScreen(viewModel = budgetDetailViewModel, title = top.title, onBack = { pop() }, onOpenManage = { navStack.removeLastOrNull(); navStack.add(NavPage.Budget) }, onEditTransaction = { recordViewModel.startEdit(it) })
+                    }
+                    is NavPage.Budget -> BudgetScreen(onBack = { pop() }, onOpenDetail = { cid, title -> navStack.add(NavPage.BudgetDetail(cid, title)) })
                     is NavPage.Drawer -> DrawerRouteContent(top.route, onBack = { pop() }, onCustomizeHome = { navStack.add(NavPage.CustomizeHome) }, onAddLedger = { navStack.add(NavPage.LedgerTemplatePage) }, onManageLedger = { navStack.add(NavPage.LedgerManage) }, onOpenSettings = { navStack.add(NavPage.Drawer(DrawerRoutes.SETTINGS)) }, onOpenLedgerManage = { navStack.add(NavPage.LedgerManageHub) })
                     null -> androidx.compose.foundation.pager.HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize(), beyondViewportPageCount = 2) { page ->
                         when (page) {
@@ -183,7 +186,7 @@ fun AppNavGraph() {
                                 onSearch = { navStack.add(NavPage.Drawer(DrawerRoutes.SEARCH)) },
                                 onOpenMonthDetail = { navStack.add(NavPage.MonthDetail) },
                                 onMoreBudget = { navStack.add(NavPage.Budget) },
-                                onOpenBudgetDetail = { navStack.add(NavPage.BudgetDetail) },
+                                onOpenBudgetDetail = { navStack.add(NavPage.BudgetDetail(null, "总预算")) },
                                 onNavigate = { route -> navStack.add(NavPage.Drawer(route)) },
                                 onCustomizeHome = { navStack.add(NavPage.CustomizeHome) },
                                 onOpenCalendar = { navStack.add(NavPage.Calendar) },
@@ -213,7 +216,7 @@ fun AppNavGraph() {
             onDismiss = { showRecord = false; recordViewModel.clearEditTarget() },
             onDelete = { editingTarget?.let { recordViewModel.delete(it.id) } },
             onSave = { draft, oldId, images -> recordViewModel.submitDraft(draft, oldId, images) },
-            onSaveFinished = { showRecord = false; recordViewModel.clearEditTarget(); if (navStack.contains(NavPage.Calendar)) calendarViewModel.reload(); if (navStack.contains(NavPage.BudgetDetail)) budgetDetailViewModel.reload() },
+            onSaveFinished = { showRecord = false; recordViewModel.clearEditTarget(); if (navStack.contains(NavPage.Calendar)) calendarViewModel.reload(); if (navStack.any { it is NavPage.BudgetDetail }) budgetDetailViewModel.reload() },
             onCreateAccount = { name -> recordViewModel.createAccount(name) },
             onSaveMember = { member -> recordViewModel.saveMember(member) },
             onDeleteMember = { id -> recordViewModel.deleteMember(id) },

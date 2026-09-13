@@ -173,7 +173,7 @@ private fun MonthTxRow(tx: TransactionDisplay, batch: Boolean, checked: Boolean,
     var menu by remember { mutableStateOf(false) }
     val isTransfer = tx.type == TransactionType.TRANSFER
     val amountColor = when { isTransfer || tx.type == TransactionType.LOAN -> MaterialTheme.colorScheme.onSurface; tx.amount < 0 -> expenseRed; else -> incomeGreen }
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).combinedClickable(onClick = onClick, onLongClick = onLongClick).padding(horizontal = 12.dp, vertical = 10.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerLow).combinedClickable(onClick = onClick, onLongClick = onLongClick).padding(horizontal = 12.dp, vertical = 10.dp)) {
         if (batch) Checkbox(checked = checked, onCheckedChange = { onClick() })
         CategoryIcon(if (isTransfer || tx.type == TransactionType.LOAN) "🔁" else tx.categoryIcon, size = 36.dp, fontSize = 16.sp, fallbackContainer = SemanticColors.ExpenseRed.copy(alpha = 0.1f))
         Spacer(Modifier.width(10.dp))

@@ -90,7 +90,7 @@ private fun ReimbursementRow(tx: TransactionDisplay, reimbursed: Boolean, onReim
     SwipeToDismissBox(state = dismissState, enableDismissFromStartToEnd = false, enableDismissFromEndToStart = true, backgroundContent = {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primaryContainer).padding(end = AppSpacing.xxl), contentAlignment = Alignment.CenterEnd) { Text(if (reimbursed) "取消报销" else "标记已报销", color = MaterialTheme.colorScheme.onPrimaryContainer) }
     }) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).grayscale().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerLow).grayscale().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)) {
                 CategoryIcon(tx.categoryIcon, size = AppSize.iconXLarge, fontSize = 18.sp, modifier = Modifier.padding(end = AppSpacing.sm))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(tx.categoryName)

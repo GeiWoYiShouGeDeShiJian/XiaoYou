@@ -175,7 +175,7 @@ fun AccountDetailScreen(viewModel: AccountDetailViewModel = hiltViewModel(), acc
 @Composable
 private fun MonthHeader(g: AccMonthGroup) {
     var expanded by remember { mutableStateOf(true) }
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surface).clickable { expanded = !expanded }.padding(horizontal = AppSpacing.lg, vertical = 10.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceContainerLow).clickable { expanded = !expanded }.padding(horizontal = AppSpacing.lg, vertical = 10.dp)) {
         Text("${g.ym.year}-${g.ym.monthValue.toString().padStart(2, '0')}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
         Spacer(Modifier.weight(1f))
         Column(horizontalAlignment = Alignment.End) {
@@ -201,7 +201,7 @@ private fun TxRow(t: TransactionDisplay, balanceAfter: Long) {
     val dt = Instant.ofEpochMilli(t.tradeDate).atZone(ZoneId.systemDefault())
     val inflow = t.type == TransactionType.INCOME
     val amtColor = if (inflow) SemanticColors.IncomeGreen else SemanticColors.ExpenseRed
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surface).padding(horizontal = 14.dp, vertical = 10.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(horizontal = 14.dp, vertical = 10.dp)) {
         CategoryIcon(t.categoryIcon.ifBlank { "💵" }, size = 36.dp, fontSize = 16.sp, fallbackContainer = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
         Spacer(Modifier.width(AppSpacing.md))
         Column(modifier = Modifier.weight(1f)) {

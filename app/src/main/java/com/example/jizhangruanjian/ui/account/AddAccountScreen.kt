@@ -171,7 +171,7 @@ fun AddAccountScreen(viewModel: AddAccountViewModel = hiltViewModel(), onBack: (
                 Text("添加账户", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 IconButton(onClick = { page = "custom" }) { Icon(Icons.Filled.AddCircle, contentDescription = "自定义账户类型") }
             }
-            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surface)) {
+            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow)) {
                 PRESETS.forEach { p ->
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable {
                         if (groups.isEmpty()) { Toast.makeText(context, "请先在账户管理中创建分组", Toast.LENGTH_SHORT).show(); return@clickable }
@@ -226,7 +226,7 @@ private fun SubListScreen(preset: AccountPreset, groups: List<AccountGroupDomain
                 IconButton(onClick = { showSearch = true }) { Icon(Icons.Filled.Search, contentDescription = "搜索") }
             }
         }
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surface)) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow)) {
             (preset.children ?: emptyList()).filter { it.name.contains(query.trim()) }.forEach { item ->
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onPick(item) }.padding(horizontal = 16.dp, vertical = 14.dp)) {
                     Box(modifier = Modifier.size(34.dp).clip(RoundedCornerShape(17.dp)).background(Color(item.color)), contentAlignment = Alignment.Center) {

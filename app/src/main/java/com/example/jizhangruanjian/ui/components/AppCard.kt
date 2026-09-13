@@ -22,7 +22,7 @@ import com.example.jizhangruanjian.ui.theme.MoneyBookTheme
 fun AppCard(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(AppRadius.medium),
-    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface,
+    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surfaceContainerLow,
     contentPadding: PaddingValues = PaddingValues(AppSpacing.lg),
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -41,7 +41,7 @@ fun AppCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(AppRadius.medium),
-    containerColor: Color = MaterialTheme.colorScheme.surface,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
     contentPadding: PaddingValues = PaddingValues(AppSpacing.lg),
     content: @Composable ColumnScope.() -> Unit
 ) {

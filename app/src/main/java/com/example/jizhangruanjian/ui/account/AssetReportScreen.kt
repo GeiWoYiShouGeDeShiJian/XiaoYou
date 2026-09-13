@@ -188,7 +188,7 @@ private fun ReportSettingsDialog(viewModel: AssetReportViewModel, onDismiss: () 
 }
 @Composable
 private fun ReportCard(title: String, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.surface).padding(AppSpacing.lg)) {
+    Column(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(AppSpacing.lg)) {
         Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(14.dp))
         content()

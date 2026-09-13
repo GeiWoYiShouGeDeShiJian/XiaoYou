@@ -50,7 +50,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 @Composable
-fun BudgetDetailScreen(viewModel: BudgetDetailViewModel = hiltViewModel(), onBack: () -> Unit, onOpenManage: () -> Unit, onEditTransaction: (Long) -> Unit) {
+fun BudgetDetailScreen(viewModel: BudgetDetailViewModel = hiltViewModel(), title: String, onBack: () -> Unit, onOpenManage: () -> Unit, onEditTransaction: (Long) -> Unit) {
     val budget by viewModel.budget.collectAsState()
     val groups by viewModel.groups.collectAsState()
     val context = LocalContext.current
@@ -60,7 +60,7 @@ fun BudgetDetailScreen(viewModel: BudgetDetailViewModel = hiltViewModel(), onBac
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Text("本月预算", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
         }
         val b = budget
         if (b == null) {
@@ -76,7 +76,7 @@ fun BudgetDetailScreen(viewModel: BudgetDetailViewModel = hiltViewModel(), onBac
         val dailyQuota = b.remaining.coerceAtLeast(0) / (daysInMonth - dayOfMonth + 1)
         val todayExpense = groups.firstOrNull { it.date == today }?.total ?: 0L
         val quotaLeft = (dailyQuota - todayExpense).coerceAtLeast(0)
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(16.dp)) {
             Text("%02d.%02d - %02d.%02d".format(month.monthValue, 1, month.monthValue, daysInMonth), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(16.dp))
             Text("预算剩余", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -154,7 +154,7 @@ private fun ActionButton(icon: androidx.compose.ui.graphics.vector.ImageVector, 
 }
 @Composable
 private fun StatCard(title: String, value: String, sub: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surface).padding(vertical = 14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier.clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).padding(vertical = 14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(6.dp))
         Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -164,7 +164,7 @@ private fun StatCard(title: String, value: String, sub: String, modifier: Modifi
 }
 @Composable
 private fun BudgetTxRow(t: TransactionDisplay, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surface).clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 10.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 10.dp)) {
         CategoryIcon(t.categoryIcon, size = 36.dp, fontSize = 16.sp)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {

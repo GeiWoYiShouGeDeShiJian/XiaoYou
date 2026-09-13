@@ -153,7 +153,7 @@ fun LedgerPickerScreen(viewModel: LedgerViewModel = hiltViewModel(), onBack: () 
         LazyVerticalGrid(columns = GridCells.Fixed(2), contentPadding = PaddingValues(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxSize()) {
             items(list.size, key = { list[it].id }) { idx ->
                 val l = list[idx]
-                Column(modifier = Modifier.clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surface).clickable { viewModel.switch(l.id); onBack() }) {
+                Column(modifier = Modifier.clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).clickable { viewModel.switch(l.id); onBack() }) {
                     Box {
                         LedgerCoverImage(l.cover, Modifier.fillMaxWidth().aspectRatio(1.55f))
                         if (l.id == currentId) {
@@ -249,7 +249,7 @@ fun LedgerEditScreen(viewModel: LedgerViewModel = hiltViewModel(), ledgerId: Lon
             LedgerFormFields(name, { name = it; nameError = false }, cover, { cover = it }, coverDark, { coverDark = it }, hidden, { hidden = it }, nameError)
             Spacer(Modifier.weight(1f))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(24.dp)).background(MaterialTheme.colorScheme.surface).clickable { confirmDelete = true }.padding(vertical = 14.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(24.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow).clickable { confirmDelete = true }.padding(vertical = 14.dp), contentAlignment = Alignment.Center) {
                     Text("删除", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
                 }
                 Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(24.dp)).background(MaterialTheme.colorScheme.primary).clickable {

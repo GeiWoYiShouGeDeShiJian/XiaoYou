@@ -71,7 +71,7 @@ private fun LoanRow(tx: TransactionDisplay, onSettle: () -> Unit) {
     SwipeToDismissBox(state = dismissState, enableDismissFromStartToEnd = false, enableDismissFromEndToStart = true, backgroundContent = {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.tertiaryContainer).padding(end = AppSpacing.xxl), contentAlignment = Alignment.CenterEnd) { Text("标记已还", color = MaterialTheme.colorScheme.onTertiaryContainer) }
     }) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerLow).padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)) {
             Text("👤", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(end = AppSpacing.sm))
             Column(modifier = Modifier.weight(1f)) {
                 Text(if (tx.memberName.isBlank()) "对方成员" else tx.memberName)

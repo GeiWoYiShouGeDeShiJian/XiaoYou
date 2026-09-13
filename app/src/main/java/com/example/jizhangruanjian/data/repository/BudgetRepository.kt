@@ -28,6 +28,11 @@ class BudgetRepository @Inject constructor(
             val total = budgets.firstOrNull { it.period.name == "MONTHLY" && it.categoryId == null }
             flow { emit(total?.let { computeOne(it) }) }
         }.first()
+    suspend fun stateFor(ledgerId: Long, categoryId: Long?): BudgetState? =
+        budgetDao.observeByLedger(ledgerId).flatMapLatest { budgets ->
+            val target = budgets.firstOrNull { it.period.name == "MONTHLY" && it.categoryId == categoryId }
+            flow { emit(target?.let { computeOne(it) }) }
+        }.first()
     suspend fun computeOne(b: Budget): BudgetState {
         val (curStart, curEnd, prevStart) = ranges(b.period.name)
         val spent = transactionDao.sumExpense(b.ledgerId, b.categoryId, curStart, curEnd)
