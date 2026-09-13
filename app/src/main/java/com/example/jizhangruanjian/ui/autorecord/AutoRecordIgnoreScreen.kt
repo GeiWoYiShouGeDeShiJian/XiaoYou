@@ -7,35 +7,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.jizhangruanjian.ui.components.AppTopBar
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AutoRecordIgnoreScreen(onBack: () -> Unit, viewModel: AutoRecordSettingsViewModel = hiltViewModel()) {
     val ignored by viewModel.ignoredList.collectAsState()
     LaunchedEffect(viewModel) { viewModel.loadIgnored() }
     Scaffold(topBar = {
-        TopAppBar(title = { Text("忽略名单") }, navigationIcon = {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-        }, actions = {
+        AppTopBar(title = "忽略名单", onBack = onBack, actions = {
             if (ignored.isNotEmpty()) TextButton(onClick = { viewModel.clearIgnored() }) { Text("清空") }
         })
     }) { padding ->
@@ -46,7 +41,7 @@ fun AutoRecordIgnoreScreen(onBack: () -> Unit, viewModel: AutoRecordSettingsView
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
                 items(ignored) { fp ->
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm)) {
                         Text(readable(fp), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                         IconButton(onClick = { viewModel.removeIgnored(fp) }) { Icon(Icons.Filled.Close, contentDescription = "移除") }
                     }

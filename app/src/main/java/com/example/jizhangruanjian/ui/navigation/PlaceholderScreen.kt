@@ -16,14 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 // 占位页：未实现的路由，统一顶栏带返回
 @Composable
 internal fun PlaceholderScreen(title: String, onBack: () -> Unit = {}) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxSize().padding(AppSpacing.lg)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(AppSpacing.xs))
             Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         }
     }

@@ -1,6 +1,7 @@
 package com.example.jizhangruanjian.ui.settings
 import android.os.Build
 import com.example.jizhangruanjian.ui.components.CollapsingTitleScaffold
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -68,8 +68,8 @@ fun BackupScreen(onBack: () -> Unit, onOpenSettings: () -> Unit = {}, viewModel:
         IconButton(onClick = { showHelp = true }) { Icon(Icons.Filled.HelpOutline, contentDescription = "帮助") }
     }) {
             Text("本地", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 14.dp, vertical = 8.dp)) {
+            Spacer(Modifier.height(AppSpacing.sm))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 14.dp, vertical = AppSpacing.sm)) {
                 Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.size(22.dp))
                 Spacer(Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -86,14 +86,14 @@ fun BackupScreen(onBack: () -> Unit, onOpenSettings: () -> Unit = {}, viewModel:
                 }
                 Switch(checked = autoEnabled, onCheckedChange = { viewModel.setAutoBackup(it) })
             }
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(AppSpacing.xl))
             Text("设置", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(AppSpacing.xs))
             SettingRow("自动备份的时间间隔", "$interval 小时") { showInterval = true }
             SettingRow("本机名称", deviceName.ifBlank { Build.MODEL }) { deviceInput = deviceName.ifBlank { Build.MODEL }; showDevice = true }
             SettingRow("自动管理备份文件", "保留 $keepCount 份") { showKeep = true }
-        Spacer(Modifier.height(12.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Spacer(Modifier.height(AppSpacing.md))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
             OutlinedButton(onClick = { viewModel.loadBackupFiles(); showRestoreList = true }, enabled = !busy, modifier = Modifier.weight(1f)) {
                 if (busy) CircularProgressIndicator(modifier = Modifier.size(18.dp)) else Text("恢复数据")
             }
@@ -133,7 +133,7 @@ fun BackupScreen(onBack: () -> Unit, onOpenSettings: () -> Unit = {}, viewModel:
         AlertDialog(onDismissRequest = { viewModel.dismissNeedPassword() }, confirmButton = { TextButton(enabled = pwd.isNotBlank(), onClick = { viewModel.dismissNeedPassword(); viewModel.confirmPassword(pwd) }) { Text("确定") } }, dismissButton = { TextButton(onClick = { viewModel.dismissNeedPassword() }) { Text("取消") } }, title = { Text("输入备份密码") }, text = {
             Column {
                 Text("所选备份文件不是本机生成的本地备份，请输入备份密码。", style = MaterialTheme.typography.bodySmall)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(AppSpacing.sm))
                 OutlinedTextField(value = pwd, onValueChange = { pwd = it }, label = { Text("密码") }, singleLine = true)
             }
         })
@@ -155,7 +155,7 @@ fun BackupScreen(onBack: () -> Unit, onOpenSettings: () -> Unit = {}, viewModel:
 }
 @Composable
 private fun SettingRow(label: String, value: String, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 12.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = AppSpacing.md)) {
         Text(label, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.width(6.dp))
         Icon(Icons.Filled.HelpOutline, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))

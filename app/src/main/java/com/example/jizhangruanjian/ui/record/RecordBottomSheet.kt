@@ -60,6 +60,9 @@ import com.example.jizhangruanjian.core.util.Formatters
 import com.example.jizhangruanjian.core.util.KeywordMatcher
 import com.example.jizhangruanjian.ui.components.SuccessCheckmark
 import com.example.jizhangruanjian.ui.components.CategoryIcon
+import com.example.jizhangruanjian.ui.components.AppButton
+import com.example.jizhangruanjian.ui.components.AppButtonVariant
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import com.example.jizhangruanjian.data.model.Transaction
 import com.example.jizhangruanjian.data.model.TransactionType
 import com.example.jizhangruanjian.domain.model.AccountDomain
@@ -130,51 +133,51 @@ fun RecordBottomSheet(
     }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Box(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = AppSpacing.lg)) {
             // P12 语音入口
             Button(onClick = { startSpeech() }, enabled = !listening) { Text(if (listening) "正在聆听…" else "🎤 语音记账") }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(AppSpacing.md))
             // 顶部类型切换（含转账）
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                 listOf(TransactionType.EXPENSE, TransactionType.INCOME, TransactionType.TRANSFER).forEach { t ->
                     FilterChip(selected = selectedType == t, onClick = { onTypeChange(t); include = (t != TransactionType.TRANSFER); toAccountId = 0L }, label = { Text(if (t == TransactionType.EXPENSE) "支出" else if (t == TransactionType.INCOME) "收入" else "转账") })
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(AppSpacing.md))
             OutlinedTextField(value = amountExpr, onValueChange = { amountExpr = it }, label = { Text("金额") }, singleLine = true, textStyle = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth().focusRequester(focusRequester))
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(AppSpacing.xs))
             Text("= ${AmountCalculator.evaluate(amountExpr)?.let { String.format(Locale.CHINA, "¥%.2f", it) } ?: "—"}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             // R11 计算器快捷键：清空 / 回退 / 四则运算
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { amountExpr = "" }, contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp)) { Text("C") }
-                Button(onClick = { if (amountExpr.isNotBlank()) amountExpr = amountExpr.dropLast(1) }, contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp)) { Text("⌫") }
-                listOf("+", "-", "*", "/", ".", "00").forEach { op -> Button(onClick = { amountExpr += op }, contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp)) { Text(op) } }
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
+                Button(onClick = { amountExpr = "" }, contentPadding = androidx.compose.foundation.layout.PaddingValues(AppSpacing.sm)) { Text("C") }
+                Button(onClick = { if (amountExpr.isNotBlank()) amountExpr = amountExpr.dropLast(1) }, contentPadding = androidx.compose.foundation.layout.PaddingValues(AppSpacing.sm)) { Text("⌫") }
+                listOf("+", "-", "*", "/", ".", "00").forEach { op -> Button(onClick = { amountExpr += op }, contentPadding = androidx.compose.foundation.layout.PaddingValues(AppSpacing.sm)) { Text(op) } }
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(AppSpacing.md))
             if (selectedType != TransactionType.TRANSFER) {
                 // 二级分类选择：先一级后二级（P15-S5 圆形网格）
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), maxItemsInEachRow = 4) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs), maxItemsInEachRow = 4) {
                     expenseParents.forEach { c -> CategoryGridItem(icon = c.icon, label = c.name, selected = (categoryId == c.id || categories.any { e -> e.parentId == c.id && e.id == categoryId }), onClick = { categoryId = c.id }) }
                 }
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), maxItemsInEachRow = 4) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs), maxItemsInEachRow = 4) {
                     children.forEach { c -> CategoryGridItem(icon = c.icon, label = c.name, selected = categoryId == c.id, onClick = { categoryId = c.id }) }
                 }
                 // R13 手动选分类后记忆备注为关键词
                 if (categoryId != 0L && note.isNotBlank()) {
                     TextButton(onClick = { rememberDialog = true }) { Text("记忆备注为关键词") }
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(AppSpacing.md))
             }
             if (selectedType == TransactionType.TRANSFER) {
                 // 转账：转出账户、转入账户
                 Text("转出账户", style = MaterialTheme.typography.labelLarge)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                     accounts.filter { it.id != toAccountId }.forEach { a -> FilterChip(selected = accountId == a.id, onClick = { accountId = a.id }, label = { Text(a.name) }) }
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(AppSpacing.sm))
                 Text("转入账户", style = MaterialTheme.typography.labelLarge)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                     accounts.filter { it.id != accountId }.forEach { a -> FilterChip(selected = toAccountId == a.id, onClick = { toAccountId = a.id }, label = { Text(a.name) }) }
                 }
             } else {
@@ -184,43 +187,43 @@ fun RecordBottomSheet(
                     Text(if (advancedExpanded) "▾" else "▸", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 if (advancedExpanded) {
-                    Spacer(Modifier.height(8.dp))
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Spacer(Modifier.height(AppSpacing.sm))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                         accounts.forEach { a -> FilterChip(selected = accountId == a.id, onClick = { accountId = a.id }, label = { Text(a.name) }) }
                         FilterChip(selected = showNewAccount, onClick = { showNewAccount = !showNewAccount }, label = { Text("➕ 新建账户") })
                     }
                     if (showNewAccount) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             OutlinedTextField(value = newAccountName, onValueChange = { newAccountName = it }, label = { Text("账户名称") }, singleLine = true, modifier = Modifier.weight(1f))
-                            Spacer(Modifier.width(8.dp))
+                            Spacer(Modifier.width(AppSpacing.sm))
                             Button(onClick = { if (newAccountName.isNotBlank()) { onCreateAccount(newAccountName); newAccountName = ""; showNewAccount = false } }) { Text("添加") }
                         }
                     }
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(AppSpacing.md))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("计入结余", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                         androidx.compose.material3.Switch(checked = include, onCheckedChange = { include = it })
                     }
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(AppSpacing.sm))
                     OutlinedTextField(value = note, onValueChange = { note = it }, label = { Text("备注") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 }
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(AppSpacing.lg))
             if (accounts.isEmpty() && !showNewAccount) {
                 Text("请先新建账户", color = MaterialTheme.colorScheme.error)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(AppSpacing.sm))
             }
-            Button(onClick = {
+            AppButton(text = "保存", onClick = {
                 val cents = if (amountExpr.isBlank()) 0L else AmountCalculator.toCents(amountExpr)
                 val isTransfer = selectedType == TransactionType.TRANSFER
-                if (cents < 0L || accountId == 0L) return@Button
-                if (!isTransfer && categoryId == 0L) return@Button
-                if (isTransfer && (toAccountId == 0L || toAccountId == accountId)) return@Button
+                if (cents < 0L || accountId == 0L) return@AppButton
+                if (!isTransfer && categoryId == 0L) return@AppButton
+                if (isTransfer && (toAccountId == 0L || toAccountId == accountId)) return@AppButton
                 onSave(TransactionDomain(id = editing?.id ?: 0L, ledgerId = editing?.ledgerId ?: 1L, accountId = accountId, toAccountId = if (isTransfer) toAccountId else null, categoryId = if (isTransfer) 0L else categoryId, type = selectedType, amount = cents, note = note, tradeDate = tradeDate, includeInSummary = include), editing?.id)
                 showCheck = true
                 checkScope.launch { delay(700); onSaveFinished() }
-            }, enabled = amountExpr.isNotBlank() && accountId != 0L && (selectedType != TransactionType.TRANSFER && categoryId != 0L || selectedType == TransactionType.TRANSFER && toAccountId != 0L && toAccountId != accountId), modifier = Modifier.fillMaxWidth()) { Text("保存") }
-            Spacer(Modifier.height(24.dp))
+            }, variant = AppButtonVariant.Primary, enabled = amountExpr.isNotBlank() && accountId != 0L && (selectedType != TransactionType.TRANSFER && categoryId != 0L || selectedType == TransactionType.TRANSFER && toAccountId != 0L && toAccountId != accountId), modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(AppSpacing.xxl))
         }
         if (showCheck) {
             Box(modifier = Modifier.matchParentSize().background(MaterialTheme.colorScheme.surfaceContainer), contentAlignment = Alignment.Center) {
@@ -228,7 +231,7 @@ fun RecordBottomSheet(
                 LaunchedEffect(Unit) { appear = true }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     SuccessCheckmark(visible = appear, modifier = Modifier.size(96.dp))
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(AppSpacing.lg))
                     Text("保存成功", style = MaterialTheme.typography.titleMedium)
                 }
             }
@@ -253,7 +256,7 @@ private fun CategoryGridItem(icon: String, label: String, selected: Boolean, onC
         Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
             CategoryIcon(icon, size = 40.dp, fontSize = 20.sp, selected = selected)
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(AppSpacing.xs))
         Text(label, style = MaterialTheme.typography.labelSmall, color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
     }
 }

@@ -31,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.jizhangruanjian.R
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 private data class DrawerEntry(val route: String, val icon: ImageVector, val label: String)
 private val FUNCTION_ITEMS = listOf(
     DrawerEntry(DrawerRoutes.AUTO_BOOKKEEPING, Icons.Filled.Bolt, "自动记账"),
@@ -45,13 +46,13 @@ private val DATA_ITEMS = listOf(
 @Composable
 fun AppDrawerContent(onNavigate: (String) -> Unit, onDismiss: () -> Unit = {}) {
     ModalDrawerSheet {
-        Column(modifier = Modifier.padding(vertical = 16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(vertical = AppSpacing.lg)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm)) {
                 Icon(painterResource(R.drawable.ic_logo), contentDescription = "柚子记账", modifier = Modifier.size(34.dp), tint = Color.Unspecified)
                 Spacer(Modifier.width(10.dp))
                 Text("小柚记账", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
             SectionGroup(null, FUNCTION_ITEMS, onNavigate)
             HorizontalDivider()
             SectionGroup("数据", DATA_ITEMS, onNavigate)
@@ -61,15 +62,15 @@ fun AppDrawerContent(onNavigate: (String) -> Unit, onDismiss: () -> Unit = {}) {
 @Composable
 private fun SectionGroup(title: String?, items: List<DrawerEntry>, onNavigate: (String) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        if (title != null) Text(title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+        if (title != null) Text(title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm))
         items.forEach { DrawerItem(it, onNavigate) }
     }
 }
 @Composable
 private fun DrawerItem(entry: DrawerEntry, onNavigate: (String) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onNavigate(entry.route) }.padding(horizontal = 16.dp, vertical = 12.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onNavigate(entry.route) }.padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)) {
         Icon(entry.icon, contentDescription = entry.label, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(AppSpacing.lg))
         Text(entry.label, style = MaterialTheme.typography.bodyLarge)
     }
 }

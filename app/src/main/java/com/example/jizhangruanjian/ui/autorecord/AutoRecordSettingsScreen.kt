@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.HelpOutline
@@ -40,6 +39,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.jizhangruanjian.core.autorecord.AutoRecordSettings
 import com.example.jizhangruanjian.ui.components.CollapsingTitleScaffold
+import com.example.jizhangruanjian.ui.theme.AppSpacing
 import com.example.jizhangruanjian.ui.navigation.PlaceholderScreen
 @Composable
 fun AutoRecordSettingsScreen(onBack: () -> Unit, viewModel: AutoRecordSettingsViewModel = hiltViewModel()) {
@@ -91,7 +91,7 @@ fun AutoRecordSettingsScreen(onBack: () -> Unit, viewModel: AutoRecordSettingsVi
         if (missingPerms.isNotEmpty()) {
             SettingCard {
                 Text("缺少以下运行权限", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(vertical = 6.dp))
-                Text("自动记账将降级为通知提醒，无法弹出悬浮球", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 4.dp))
+                Text("自动记账将降级为通知提醒，无法弹出悬浮球", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = AppSpacing.xs))
                 missingPerms.forEach { key ->
                     val label = when (key) { "overlay" -> "悬浮窗（显示在其他应用上层）"; "acc" -> "无障碍服务"; else -> "通知使用权" }
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
@@ -106,7 +106,7 @@ fun AutoRecordSettingsScreen(onBack: () -> Unit, viewModel: AutoRecordSettingsVi
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(AppSpacing.sm))
         }
         SettingCard {
             DescRow("草稿箱", "来不及记账时可先存入草稿，后续再编辑") { placeholder = "草稿箱" }
@@ -136,11 +136,11 @@ fun AutoRecordSettingsScreen(onBack: () -> Unit, viewModel: AutoRecordSettingsVi
             SwitchDescRow("重复账单显示编辑弹窗", "关闭后，对于已添加的账单将只显示提示，不显示弹窗", dupEdit) { viewModel.setDupEdit(it) }
             SwitchDescRow("隐藏后台", "使用「侧滑/返回键」退出应用后，应用将不显示在多任务管理界面中", hideBackground) { viewModel.setHideBackground(it) }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(AppSpacing.sm))
         SettingCard {
             DescRow("▶ 测试自动记账", "生成一笔模拟账单触发：识别→入账→悬浮球，可验证分类面板与本次更新") { viewModel.testRecord() }
         }
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(AppSpacing.xxl))
     }
     if (showHelp) HelpDialog { showHelp = false }
     if (overlayMissing) {
@@ -160,11 +160,11 @@ private fun modeLabel(mode: String): String = when (mode) {
 }
 @Composable
 private fun SettingSection(title: String) {
-    Text(title, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
+    Text(title, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = AppSpacing.lg, bottom = AppSpacing.sm))
 }
 @Composable
 private fun SettingCard(content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 14.dp, vertical = 4.dp), content = content)
+    Column(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 14.dp, vertical = AppSpacing.xs), content = content)
 }
 @Composable
 private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
@@ -185,7 +185,7 @@ private fun SwitchDescRow(label: String, desc: String, checked: Boolean, onCheck
 }
 @Composable
 private fun DescRow(label: String, desc: String, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 12.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = AppSpacing.md)) {
         Column(Modifier.weight(1f)) {
             Text(label, style = MaterialTheme.typography.bodyLarge)
             if (desc.isNotBlank()) Text(desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -195,7 +195,7 @@ private fun DescRow(label: String, desc: String, onClick: () -> Unit) {
 }
 @Composable
 private fun ValueRow(label: String, value: String, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 12.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = AppSpacing.md)) {
         Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
